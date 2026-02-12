@@ -283,22 +283,17 @@ if len(events.Items) > 0 {
 
 ## 🧪 Examples & Tests
 
-Runnable examples:
+All unit tests and fuzz tests run via [GitHub Actions](https://github.com/mrz1836/go-pandadoc/actions) and use [Go version 1.24.x](https://go.dev/doc/go1.24). View the [configuration file](.github/workflows/fortress.yml).
 
-- [examples/list_documents](examples/list_documents)
-- [examples/list_catalog](examples/list_catalog)
-- [examples/get_document_fields](examples/get_document_fields)
+Run all tests (fast):
 
-Run tests:
-
-```bash
-go test ./...
+```bash script
+magex test
 ```
 
-Race detector:
-
-```bash
-go test -race ./...
+Run all tests with race detector (slower):
+```bash script
+magex test:race
 ```
 
 <br/>
