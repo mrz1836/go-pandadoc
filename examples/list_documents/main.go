@@ -1,11 +1,43 @@
+// Example: List documents from PandaDoc
 package main
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
 
-// Package main demonstrates how to list documents using the PandaDoc SDK.
+	"github.com/mrz1836/go-pandadoc"
+	"github.com/mrz1836/go-pandadoc/commands"
+)
 
 func main() {
-	// TODO: Implement example for listing documents
-	fmt.Println("Example: List Documents")
-	fmt.Println("To be implemented in Phase 6")
+	// Get API key from environment
+	apiKey := os.Getenv("PANDADOC_API_KEY")
+	if apiKey == "" {
+		log.Fatal("PANDADOC_API_KEY environment variable is required")
+	}
+
+	// Create client
+	client, err := pandadoc.NewClient(apiKey)
+	if err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+
+	// List documents with options
+	opts := &commands.ListDocumentsOptions{
+		Count:  10,
+		Status: "document.completed",
+	}
+
+	docs, err := client.Documents().List(context.Background(), opts)
+	if err != nil {
+		log.Fatalf("Failed to list documents: %v", err)
+	}
+
+	// Print results
+	fmt.Printf("Found %d documents:\n", docs.Count)
+	for _, doc := range docs.Results {
+		fmt.Printf("  - %s: %s (status: %s)\n", doc.ID, doc.Name, doc.Status)
+	}
 }
