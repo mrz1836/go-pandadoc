@@ -61,26 +61,28 @@
 
 <table align="center">
   <tr>
-    <td align="center" width="20%">
+    <td align="center" width="33%">
        📦&nbsp;<a href="#-installation"><code>Installation</code></a>
     </td>
-    <td align="center" width="20%">
+    <td align="center" width="33%">
        🚀&nbsp;<a href="#-quick-start"><code>Quick&nbsp;Start</code></a>
     </td>
-    <td align="center" width="20%">
+    <td align="center" width="33%">
        📚&nbsp;<a href="#-features"><code>Features</code></a>
-    </td>
-    <td align="center" width="20%">
-       🧪&nbsp;<a href="#-examples--tests"><code>Examples&nbsp;&&nbsp;Tests</code></a>
-    </td>
-    <td align="center" width="20%">
-       📚&nbsp;<a href="#-documentation"><code>Documentation</code></a>
     </td>
   </tr>
   <tr>
     <td align="center">
+       🧪&nbsp;<a href="#-examples--tests"><code>Examples&nbsp;&&nbsp;Tests</code></a>
+    </td>
+    <td align="center">
+       📚&nbsp;<a href="#-documentation"><code>Documentation</code></a>
+    </td>
+    <td align="center">
       🛠️&nbsp;<a href="#%EF%B8%8F-code-standards"><code>Code&nbsp;Standards</code></a>
     </td>
+  </tr>
+  <tr>
     <td align="center">
       🤖&nbsp;<a href="#-ai-usage--assistant-guidelines"><code>AI&nbsp;Guidelines</code></a>
     </td>
@@ -90,8 +92,14 @@
     <td align="center">
        🤝&nbsp;<a href="#-contributing"><code>Contributing</code></a>
     </td>
+  </tr>
+  <tr>
     <td align="center">
       📝&nbsp;<a href="#-license"><code>License</code></a>
+    </td>
+    <td align="center">
+    </td>
+    <td align="center">
     </td>
   </tr>
 </table>
