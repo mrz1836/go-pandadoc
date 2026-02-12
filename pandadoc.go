@@ -8,6 +8,8 @@ import (
 )
 
 // Re-export config options for convenience
+//
+//nolint:gochecknoglobals // These are re-exported functional options from config package
 var (
 	// WithBaseURL sets a custom base URL for the API.
 	WithBaseURL = config.WithBaseURL

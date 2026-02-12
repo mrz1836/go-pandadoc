@@ -1,3 +1,4 @@
+// Package config provides configuration management for the PandaDoc API client.
 package config
 
 import (
@@ -6,8 +7,6 @@ import (
 
 	"github.com/mrz1836/go-pandadoc/errors"
 )
-
-// Package config provides configuration management for the PandaDoc API client.
 
 // Config holds the configuration for the PandaDoc API client.
 type Config struct {

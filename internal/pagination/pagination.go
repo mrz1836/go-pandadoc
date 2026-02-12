@@ -1,8 +1,7 @@
+// Package pagination provides utilities for handling API pagination.
 package pagination
 
 import "github.com/mrz1836/go-pandadoc/models"
-
-// Package pagination provides utilities for handling API pagination.
 
 // NextPage returns the next page options based on the current page.
 func NextPage(current *models.ListOptions) *models.ListOptions {

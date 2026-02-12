@@ -1,12 +1,13 @@
 package auth
 
 import (
+	"context"
 	"net/http"
 	"testing"
 )
 
 func TestInjectAPIKey(t *testing.T) {
-	req, _ := http.NewRequest(http.MethodGet, "https://api.example.com/test", nil)
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, "https://api.example.com/test", nil)
 
 	InjectAPIKey(req, "test-api-key-123")
 

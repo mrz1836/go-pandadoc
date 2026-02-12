@@ -1,11 +1,12 @@
+// Package errors defines error types for the PandaDoc API client.
+//
+//nolint:revive // Package name intentionally matches error domain
 package errors
 
 import (
 	"errors"
 	"fmt"
 )
-
-// Package errors defines error types for the PandaDoc API client.
 
 var (
 	// ErrMissingAPIKey is returned when no API key is provided.
@@ -16,6 +17,15 @@ var (
 
 	// ErrRateLimitExceeded is returned when the API rate limit is exceeded (429).
 	ErrRateLimitExceeded = errors.New("API rate limit exceeded")
+
+	// ErrMissingDocumentID is returned when a document ID is required but not provided.
+	ErrMissingDocumentID = errors.New("document ID is required")
+
+	// ErrMissingCatalogItemID is returned when a catalog item ID is required but not provided.
+	ErrMissingCatalogItemID = errors.New("catalog item ID is required")
+
+	// ErrMissingUpdateData is returned when update data is required but not provided.
+	ErrMissingUpdateData = errors.New("update data is required")
 )
 
 // APIError represents an error response from the PandaDoc API.

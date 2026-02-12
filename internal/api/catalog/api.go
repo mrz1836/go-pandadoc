@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/mrz1836/go-pandadoc/commands"
+	"github.com/mrz1836/go-pandadoc/errors"
 	"github.com/mrz1836/go-pandadoc/internal/httpclient"
 	"github.com/mrz1836/go-pandadoc/models"
 )
@@ -27,7 +28,7 @@ func New(client *httpclient.Client) *API {
 // API: GET /catalog
 func (a *API) List(ctx context.Context, opts *commands.ListCatalogOptions) (*models.CatalogListResponse, error) {
 	path := "catalog"
-	if opts != nil {
+	if opts != nil { //nolint:nestif // Query parameter building is straightforward
 		params := url.Values{}
 		if opts.Page > 0 {
 			params.Set("page", strconv.Itoa(opts.Page))
@@ -47,7 +48,7 @@ func (a *API) List(ctx context.Context, opts *commands.ListCatalogOptions) (*mod
 	if err != nil {
 		return nil, fmt.Errorf("failed to list catalog items: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result models.CatalogListResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -61,7 +62,7 @@ func (a *API) List(ctx context.Context, opts *commands.ListCatalogOptions) (*mod
 // API: GET /catalog/{id}
 func (a *API) Get(ctx context.Context, id string) (*models.CatalogItem, error) {
 	if id == "" {
-		return nil, fmt.Errorf("catalog item ID is required")
+		return nil, errors.ErrMissingCatalogItemID
 	}
 
 	path := fmt.Sprintf("catalog/%s", id)
@@ -69,7 +70,7 @@ func (a *API) Get(ctx context.Context, id string) (*models.CatalogItem, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get catalog item: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result models.CatalogItem
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

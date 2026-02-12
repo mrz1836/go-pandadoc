@@ -53,7 +53,9 @@ func TestAPI_List(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedItems)
+		if err := json.NewEncoder(w).Encode(expectedItems); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -86,7 +88,9 @@ func TestAPI_List_WithOptions(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(models.CatalogListResponse{})
+		if err := json.NewEncoder(w).Encode(models.CatalogListResponse{}); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -126,7 +130,9 @@ func TestAPI_Get(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedItem)
+		if err := json.NewEncoder(w).Encode(expectedItem); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 

@@ -1,8 +1,7 @@
+// Package auth provides authentication utilities for the PandaDoc API.
 package auth
 
 import "net/http"
-
-// Package auth provides authentication utilities for the PandaDoc API.
 
 // InjectAPIKey adds the API Key authentication header to the request.
 // Format: Authorization: API-Key {apiKey}

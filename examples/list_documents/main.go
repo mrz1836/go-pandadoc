@@ -36,8 +36,8 @@ func main() {
 	}
 
 	// Print results
-	fmt.Printf("Found %d documents:\n", docs.Count)
+	fmt.Printf("Found %d documents:\n", docs.Count) //nolint:forbidigo // CLI output
 	for _, doc := range docs.Results {
-		fmt.Printf("  - %s: %s (status: %s)\n", doc.ID, doc.Name, doc.Status)
+		fmt.Printf("  - %s: %s (status: %s)\n", doc.ID, doc.Name, doc.Status) //nolint:forbidigo // CLI output
 	}
 }

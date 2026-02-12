@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/mrz1836/go-pandadoc/commands"
+	"github.com/mrz1836/go-pandadoc/errors"
 	"github.com/mrz1836/go-pandadoc/internal/httpclient"
 	"github.com/mrz1836/go-pandadoc/models"
 )
@@ -28,7 +29,7 @@ func New(client *httpclient.Client) *API {
 // API: GET /documents
 func (a *API) List(ctx context.Context, opts *commands.ListDocumentsOptions) (*models.DocumentListResponse, error) {
 	path := "documents"
-	if opts != nil {
+	if opts != nil { //nolint:nestif // Query parameter building is straightforward
 		params := url.Values{}
 		if opts.Page > 0 {
 			params.Set("page", strconv.Itoa(opts.Page))
@@ -51,7 +52,7 @@ func (a *API) List(ctx context.Context, opts *commands.ListDocumentsOptions) (*m
 	if err != nil {
 		return nil, fmt.Errorf("failed to list documents: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result models.DocumentListResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -65,7 +66,7 @@ func (a *API) List(ctx context.Context, opts *commands.ListDocumentsOptions) (*m
 // API: GET /documents/{id}
 func (a *API) Get(ctx context.Context, id string) (*models.Document, error) {
 	if id == "" {
-		return nil, fmt.Errorf("document ID is required")
+		return nil, errors.ErrMissingDocumentID
 	}
 
 	path := fmt.Sprintf("documents/%s", id)
@@ -73,7 +74,7 @@ func (a *API) Get(ctx context.Context, id string) (*models.Document, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get document: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result models.Document
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -87,7 +88,7 @@ func (a *API) Get(ctx context.Context, id string) (*models.Document, error) {
 // API: GET /documents/{id}/status
 func (a *API) GetStatus(ctx context.Context, id string) (*models.DocumentStatus, error) {
 	if id == "" {
-		return nil, fmt.Errorf("document ID is required")
+		return nil, errors.ErrMissingDocumentID
 	}
 
 	path := fmt.Sprintf("documents/%s/status", id)
@@ -95,7 +96,7 @@ func (a *API) GetStatus(ctx context.Context, id string) (*models.DocumentStatus,
 	if err != nil {
 		return nil, fmt.Errorf("failed to get document status: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result models.DocumentStatus
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -109,7 +110,7 @@ func (a *API) GetStatus(ctx context.Context, id string) (*models.DocumentStatus,
 // API: GET /documents/{id}/details
 func (a *API) GetDetails(ctx context.Context, id string) (*models.DocumentDetails, error) {
 	if id == "" {
-		return nil, fmt.Errorf("document ID is required")
+		return nil, errors.ErrMissingDocumentID
 	}
 
 	path := fmt.Sprintf("documents/%s/details", id)
@@ -117,7 +118,7 @@ func (a *API) GetDetails(ctx context.Context, id string) (*models.DocumentDetail
 	if err != nil {
 		return nil, fmt.Errorf("failed to get document details: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -136,10 +137,10 @@ func (a *API) GetDetails(ctx context.Context, id string) (*models.DocumentDetail
 // API: PATCH /documents/{id}
 func (a *API) Update(ctx context.Context, id string, update *commands.UpdateDocument) (*models.Document, error) {
 	if id == "" {
-		return nil, fmt.Errorf("document ID is required")
+		return nil, errors.ErrMissingDocumentID
 	}
 	if update == nil {
-		return nil, fmt.Errorf("update data is required")
+		return nil, errors.ErrMissingUpdateData
 	}
 
 	path := fmt.Sprintf("documents/%s", id)
@@ -147,7 +148,7 @@ func (a *API) Update(ctx context.Context, id string, update *commands.UpdateDocu
 	if err != nil {
 		return nil, fmt.Errorf("failed to update document: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result models.Document
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

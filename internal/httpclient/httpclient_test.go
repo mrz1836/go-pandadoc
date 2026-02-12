@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"context"
+	stderrors "errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -30,120 +31,131 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestDoRequest(t *testing.T) {
-	t.Run("successful request", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Verify headers
-			if r.Header.Get("Authorization") != "API-Key test-key" {
-				t.Errorf("expected Authorization header 'API-Key test-key', got '%s'", r.Header.Get("Authorization"))
-			}
-
-			if r.Header.Get("Content-Type") != "application/json" {
-				t.Errorf("expected Content-Type 'application/json', got '%s'", r.Header.Get("Content-Type"))
-			}
-
-			if r.Header.Get("User-Agent") != "test-agent/1.0" {
-				t.Errorf("expected User-Agent 'test-agent/1.0', got '%s'", r.Header.Get("User-Agent"))
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"status": "ok"}`))
-		}))
-		defer server.Close()
-
-		client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
-		resp, err := client.DoRequest(context.Background(), http.MethodGet, "/test", nil)
-
-		if err != nil {
-			t.Fatalf("expected no error, got %v", err)
+func TestDoRequest_SuccessfulRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Verify headers
+		if r.Header.Get("Authorization") != "API-Key test-key" {
+			t.Errorf("expected Authorization header 'API-Key test-key', got '%s'", r.Header.Get("Authorization"))
 		}
 
-		if resp.StatusCode != http.StatusOK {
-			t.Errorf("expected status 200, got %d", resp.StatusCode)
+		if r.Header.Get("Content-Type") != "application/json" {
+			t.Errorf("expected Content-Type 'application/json', got '%s'", r.Header.Get("Content-Type"))
 		}
 
-		resp.Body.Close()
-	})
-
-	t.Run("request with body", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-		}))
-		defer server.Close()
-
-		client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
-
-		body := map[string]string{"key": "value"}
-		resp, err := client.DoRequest(context.Background(), http.MethodPost, "/test", body)
-
-		if err != nil {
-			t.Fatalf("expected no error, got %v", err)
+		if r.Header.Get("User-Agent") != "test-agent/1.0" {
+			t.Errorf("expected User-Agent 'test-agent/1.0', got '%s'", r.Header.Get("User-Agent"))
 		}
 
-		resp.Body.Close()
-	})
-
-	t.Run("rate limit error", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusTooManyRequests)
-			w.Write([]byte(`{"message": "Rate limit exceeded"}`))
-		}))
-		defer server.Close()
-
-		client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
-		_, err := client.DoRequest(context.Background(), http.MethodGet, "/test", nil)
-
-		if err != errors.ErrRateLimitExceeded {
-			t.Errorf("expected ErrRateLimitExceeded, got %v", err)
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write([]byte(`{"status": "ok"}`)); err != nil {
+			t.Errorf("failed to write response: %v", err)
 		}
-	})
+	}))
+	defer server.Close()
 
-	t.Run("API error", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"message": "Invalid request", "details": {"field": "error"}}`))
-		}))
-		defer server.Close()
+	client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
+	resp, err := client.DoRequest(context.Background(), http.MethodGet, "/test", nil)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
 
-		client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
-		_, err := client.DoRequest(context.Background(), http.MethodGet, "/test", nil)
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("expected status 200, got %d", resp.StatusCode)
+	}
 
-		if err == nil {
-			t.Fatal("expected error, got nil")
+	_ = resp.Body.Close()
+}
+
+func TestDoRequest_WithBody(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
+
+	body := map[string]string{"key": "value"}
+	resp, err := client.DoRequest(context.Background(), http.MethodPost, "/test", body)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	_ = resp.Body.Close()
+}
+
+func TestDoRequest_RateLimitError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusTooManyRequests)
+		if _, err := w.Write([]byte(`{"message": "Rate limit exceeded"}`)); err != nil {
+			t.Errorf("failed to write response: %v", err)
 		}
+	}))
+	defer server.Close()
 
-		apiErr, ok := err.(*errors.APIError)
-		if !ok {
-			t.Fatalf("expected APIError, got %T", err)
+	client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
+	resp, err := client.DoRequest(context.Background(), http.MethodGet, "/test", nil)
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
+
+	if !stderrors.Is(err, errors.ErrRateLimitExceeded) {
+		t.Errorf("expected ErrRateLimitExceeded, got %v", err)
+	}
+}
+
+func TestDoRequest_APIError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := w.Write([]byte(`{"message": "Invalid request", "details": {"field": "error"}}`)); err != nil {
+			t.Errorf("failed to write response: %v", err)
 		}
+	}))
+	defer server.Close()
 
-		if apiErr.StatusCode != http.StatusBadRequest {
-			t.Errorf("expected status code 400, got %d", apiErr.StatusCode)
-		}
+	client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
+	resp, err := client.DoRequest(context.Background(), http.MethodGet, "/test", nil)
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
 
-		if apiErr.Message != "Invalid request" {
-			t.Errorf("expected message 'Invalid request', got '%s'", apiErr.Message)
-		}
-	})
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
 
-	t.Run("context cancellation", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			time.Sleep(100 * time.Millisecond)
-			w.WriteHeader(http.StatusOK)
-		}))
-		defer server.Close()
+	var apiErr *errors.APIError
+	if !stderrors.As(err, &apiErr) {
+		t.Fatalf("expected APIError, got %T", err)
+	}
 
-		client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
+	if apiErr.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status code 400, got %d", apiErr.StatusCode)
+	}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		cancel() // Cancel immediately
+	if apiErr.Message != "Invalid request" {
+		t.Errorf("expected message 'Invalid request', got '%s'", apiErr.Message)
+	}
+}
 
-		_, err := client.DoRequest(ctx, http.MethodGet, "/test", nil)
+func TestDoRequest_ContextCancellation(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		time.Sleep(100 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
 
-		if err == nil {
-			t.Fatal("expected error due to context cancellation")
-		}
-	})
+	client := New(server.URL, "test-key", "test-agent/1.0", 30*time.Second, nil)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // Cancel immediately
+
+	resp, err := client.DoRequest(ctx, http.MethodGet, "/test", nil)
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
+
+	if err == nil {
+		t.Fatal("expected error due to context cancellation")
+	}
 }
 
 func TestBuildURL(t *testing.T) {

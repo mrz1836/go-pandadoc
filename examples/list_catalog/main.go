@@ -35,12 +35,12 @@ func main() {
 	}
 
 	// Print results
-	fmt.Printf("Found %d catalog items:\n", items.Count)
+	fmt.Printf("Found %d catalog items:\n", items.Count) //nolint:forbidigo // CLI output
 	for _, item := range items.Results {
 		price := "N/A"
 		if item.Price != nil {
 			price = fmt.Sprintf("%.2f %s", item.Price.Value, item.Price.Currency)
 		}
-		fmt.Printf("  - %s: %s (SKU: %s, Price: %s)\n", item.ID, item.Name, item.SKU, price)
+		fmt.Printf("  - %s: %s (SKU: %s, Price: %s)\n", item.ID, item.Name, item.SKU, price) //nolint:forbidigo // CLI output
 	}
 }

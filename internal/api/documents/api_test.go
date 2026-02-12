@@ -54,7 +54,9 @@ func TestAPI_List(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedDocs)
+		if err := json.NewEncoder(w).Encode(expectedDocs); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -87,7 +89,9 @@ func TestAPI_List_WithOptions(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(models.DocumentListResponse{})
+		if err := json.NewEncoder(w).Encode(models.DocumentListResponse{}); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -121,7 +125,9 @@ func TestAPI_Get(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedDoc)
+		if err := json.NewEncoder(w).Encode(expectedDoc); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -159,7 +165,9 @@ func TestAPI_GetStatus(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedStatus)
+		if err := json.NewEncoder(w).Encode(expectedStatus); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -191,7 +199,9 @@ func TestAPI_GetDetails(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedDetails)
+		if err := json.NewEncoder(w).Encode(expectedDetails); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 
@@ -235,7 +245,9 @@ func TestAPI_Update(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(expectedDoc)
+		if err := json.NewEncoder(w).Encode(expectedDoc); err != nil {
+			t.Errorf("failed to encode response: %v", err)
+		}
 	})
 	defer cleanup()
 

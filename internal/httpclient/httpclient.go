@@ -1,3 +1,4 @@
+// Package httpclient provides HTTP client utilities for making API requests.
 package httpclient
 
 import (
@@ -13,8 +14,6 @@ import (
 	"github.com/mrz1836/go-pandadoc/errors"
 	"github.com/mrz1836/go-pandadoc/internal/auth"
 )
-
-// Package httpclient provides HTTP client utilities for making API requests.
 
 // Client wraps an HTTP client with configuration.
 type Client struct {
@@ -52,9 +51,9 @@ func (c *Client) DoRequest(ctx context.Context, method, path string, body interf
 	// Marshal body if provided
 	var bodyReader io.Reader
 	if body != nil {
-		bodyBytes, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to marshal request body: %w", err)
+		bodyBytes, marshalErr := json.Marshal(body)
+		if marshalErr != nil {
+			return nil, fmt.Errorf("failed to marshal request body: %w", marshalErr)
 		}
 		bodyReader = bytes.NewReader(bodyBytes)
 	}
@@ -81,7 +80,7 @@ func (c *Client) DoRequest(ctx context.Context, method, path string, body interf
 
 	// Check for API errors
 	if err := c.checkResponse(resp); err != nil {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, err
 	}
 

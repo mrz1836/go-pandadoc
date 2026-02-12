@@ -1,6 +1,7 @@
 package config
 
 import (
+	stderrors "errors"
 	"net/http"
 	"testing"
 	"time"
@@ -79,7 +80,7 @@ func TestValidate(t *testing.T) {
 		cfg.setDefaultValues()
 
 		err := cfg.Validate()
-		if err != errors.ErrMissingAPIKey {
+		if !stderrors.Is(err, errors.ErrMissingAPIKey) {
 			t.Errorf("expected ErrMissingAPIKey, got %v", err)
 		}
 	})
@@ -90,7 +91,7 @@ func TestValidate(t *testing.T) {
 		}
 
 		err := cfg.Validate()
-		if err != errors.ErrMissingBaseURL {
+		if !stderrors.Is(err, errors.ErrMissingBaseURL) {
 			t.Errorf("expected ErrMissingBaseURL, got %v", err)
 		}
 	})
