@@ -1,0 +1,6 @@
+[allowlist]
+# Allowlist for the OpenAPI specification file which contains example credentials
+# from the official PandaDoc OpenAPI spec, not actual credentials
+files = [
+    "internal/spec/openapi/pandadoc-openapi-7\\.18\\.0\\.json"
+]

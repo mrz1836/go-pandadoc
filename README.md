@@ -115,22 +115,26 @@ import (
     "context"
     "fmt"
     "log"
+    "os"
 
     "github.com/mrz1836/go-pandadoc"
-    "github.com/mrz1836/go-pandadoc/commands"
 )
 
 func main() {
-    // Create a new client
-    client, err := pandadoc.NewClient("your-api-key")
+    apiKey := os.Getenv("PANDADOC_API_KEY")
+    if apiKey == "" {
+        log.Fatal("PANDADOC_API_KEY is required")
+    }
+
+    client, err := pandadoc.NewClientWithAPIKey(apiKey)
     if err != nil {
         log.Fatal(err)
     }
 
-    // List documents
-    docs, err := client.Documents().List(context.Background(), &commands.ListDocumentsOptions{
+    status := pandadoc.DocumentStatusCompleted
+    docs, err := client.Documents().List(context.Background(), &pandadoc.ListDocumentsOptions{
         Count:  10,
-        Status: "document.completed",
+        Status: &status,
     })
     if err != nil {
         log.Fatal(err)
@@ -146,42 +150,17 @@ func main() {
 
 ## 📚 Features
 
-### Documents API
+### Auth Modes
 
 ```go
-// List documents with pagination and filters
-docs, err := client.Documents().List(ctx, &commands.ListDocumentsOptions{
-    Page:   1,
-    Count:  25,
-    Status: "document.completed",
-})
+// API key auth
+client, err := pandadoc.NewClientWithAPIKey("api-key")
+_ = client
 
-// Get a document by ID
-doc, err := client.Documents().Get(ctx, "document-id")
-
-// Get document status
-status, err := client.Documents().GetStatus(ctx, "document-id")
-
-// Get document details (including fields)
-details, err := client.Documents().GetDetails(ctx, "document-id")
-
-// Update a document
-updated, err := client.Documents().Update(ctx, "document-id", &commands.UpdateDocument{
-    Name: "Updated Document Name",
-})
-```
-
-### Product Catalog API
-
-```go
-// List catalog items
-items, err := client.Catalog().List(ctx, &commands.ListCatalogOptions{
-    Count: 50,
-    Q:     "widget",
-})
-
-// Get a catalog item by ID
-item, err := client.Catalog().Get(ctx, "item-id")
+// OAuth bearer auth
+client, err = pandadoc.NewClientWithAccessToken("access-token")
+_ = client
+_ = err
 ```
 
 ### Client Options
@@ -189,29 +168,137 @@ item, err := client.Catalog().Get(ctx, "item-id")
 ```go
 import "time"
 
-client, err := pandadoc.NewClient("your-api-key",
+client, err := pandadoc.NewClientWithAPIKey("api-key",
     pandadoc.WithTimeout(60 * time.Second),
     pandadoc.WithUserAgent("my-app/1.0"),
-    pandadoc.WithBaseURL("https://api.pandadoc.com/public/v1/"),
+    pandadoc.WithBaseURL("https://api.pandadoc.com/"),
+    pandadoc.WithRetryPolicy(pandadoc.DefaultRetryPolicy()),
 )
+```
+
+### Documents Service
+
+```go
+// List documents
+docs, err := client.Documents().List(ctx, &pandadoc.ListDocumentsOptions{Count: 25})
+_ = docs
+
+// Create a document from JSON payload
+created, err := client.Documents().Create(ctx, pandadoc.DocumentCreateRequest{
+    "name":          "Proposal",
+    "template_uuid": "template-id",
+    "recipients": []map[string]any{
+        {"email": "jane@example.com", "first_name": "Jane", "last_name": "Doe", "role": "Signer"},
+    },
+})
+_ = created
+
+// Get status/details
+status, err := client.Documents().Status(ctx, "document-id")
+details, err := client.Documents().Details(ctx, "document-id")
+_ = status
+_ = details
+
+// Update (204 no content)
+err = client.Documents().Update(ctx, "document-id", pandadoc.DocumentUpdateRequest{
+    "name": "Updated Name",
+})
+_ = err
+```
+
+### Product Catalog Service
+
+```go
+// Search catalog
+items, err := client.ProductCatalog().Search(ctx, &pandadoc.SearchProductCatalogItemsOptions{
+    Query:   "coffee",
+    PerPage: 20,
+})
+_ = items
+
+// Create/update/get/delete
+createdItem, err := client.ProductCatalog().Create(ctx, pandadoc.CreateProductCatalogItemRequest{
+    "type":  "regular",
+    "title": "New Product",
+})
+item, err := client.ProductCatalog().Get(ctx, createdItem.UUID)
+updated, err := client.ProductCatalog().Update(ctx, createdItem.UUID, pandadoc.UpdateProductCatalogItemRequest{
+    "title": "Updated Product",
+})
+err = client.ProductCatalog().Delete(ctx, createdItem.UUID)
+_ = item
+_ = updated
+_ = err
+```
+
+### OAuth Token Exchange
+
+```go
+oauthClient, err := pandadoc.NewClient()
+token, err := oauthClient.OAuth().Token(ctx, &pandadoc.OAuthTokenRequest{
+    GrantType:    "authorization_code",
+    ClientID:     "client-id",
+    ClientSecret: "client-secret",
+    Code:         "authorization-code",
+    Scope:        "read+write",
+})
+_ = token
+_ = err
+```
+
+### Webhooks
+
+```go
+// Subscriptions
+subs, err := client.WebhookSubscriptions().List(ctx, &pandadoc.ListWebhookSubscriptionsOptions{Count: 50, Page: 1})
+createdSub, err := client.WebhookSubscriptions().Create(ctx, &pandadoc.WebhookSubscriptionRequest{
+    Name: "my-subscription",
+    URL:  "https://example.com/pandadoc/webhooks",
+    Triggers: []pandadoc.WebhookTrigger{
+        pandadoc.WebhookTriggerDocumentUpdated,
+        pandadoc.WebhookTriggerDocumentStateChanged,
+    },
+})
+sub, err := client.WebhookSubscriptions().Get(ctx, createdSub.UUID)
+updatedSub, err := client.WebhookSubscriptions().Update(ctx, createdSub.UUID, &pandadoc.WebhookSubscriptionRequest{Name: "updated-name"})
+key, err := client.WebhookSubscriptions().RegenerateSharedKey(ctx, createdSub.UUID)
+err = client.WebhookSubscriptions().Delete(ctx, createdSub.UUID)
+_ = subs
+_ = sub
+_ = updatedSub
+_ = key
+
+// Events
+events, err := client.WebhookEvents().List(ctx, &pandadoc.ListWebhookEventsOptions{
+    Type: "document_updated",
+})
+if len(events.Items) > 0 {
+    event, err := client.WebhookEvents().Get(ctx, events.Items[0].UUID)
+    _ = event
+    _ = err
+}
 ```
 
 <br/>
 
-## Examples & Tests
 ## 🧪 Examples & Tests
 
-All unit tests and fuzz tests run via [GitHub Actions](https://github.com/mrz1836/go-pandadoc/actions) and use [Go version 1.24.x](https://go.dev/doc/go1.24). View the [configuration file](.github/workflows/fortress.yml).
+Runnable examples:
 
-Run all tests (fast):
+- [examples/list_documents](examples/list_documents)
+- [examples/list_catalog](examples/list_catalog)
+- [examples/get_document_fields](examples/get_document_fields)
 
-```bash script
-magex test
+Run tests:
+
+```bash
+go test ./...
 ```
 
-Run all tests with race detector (slower):
-```bash script
-magex test:race
+Race detector:
+
+```bash
+go test -race ./...
 ```
 
 <br/>
