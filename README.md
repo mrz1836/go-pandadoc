@@ -8,7 +8,7 @@
 
 <a href="https://github.com/mrz1836/go-pandadoc/releases"><img src="https://img.shields.io/github/release-pre/mrz1836/go-pandadoc?include_prereleases&style=flat-square&logo=github&color=black" alt="Release"></a>
 <a href="https://golang.org/"><img src="https://img.shields.io/github/go-mod/go-version/mrz1836/go-pandadoc?style=flat-square&logo=go&color=00ADD8" alt="Go Version"></a>
-<a href="https://github.com/mrz1836/go-pandadoc/blob/master/LICENSE"><img src="https://img.shields.io/github/license/mrz1836/go-pandadoc?style=flat-square&color=blue" alt="License"></a>
+<a href="https://github.com/mrz1836/go-pandadoc/blob/master/LICENSE"><img src="https://img.shields.io/github/license/mrz1836/go-pandadoc?style=flat-square&color=blue&v=1" alt="License"></a>
 
 <br/>
 
@@ -25,7 +25,7 @@
        &nbsp;&nbsp;&nbsp;&nbsp; <code>Quality</code> &nbsp;&nbsp;
     </td>
     <td align="left">
-       <a href="https://goreportcard.com/report/github.com/mrz1836/go-pandadoc"><img src="https://goreportcard.com/badge/github.com/mrz1836/go-pandadoc?style=flat-square" alt="Go Report"></a>
+       <a href="https://goreportcard.com/report/github.com/mrz1836/go-pandadoc"><img src="https://goreportcard.com/badge/github.com/mrz1836/go-pandadoc?style=flat-square&v=1" alt="Go Report"></a>
        <a href="https://codecov.io/gh/mrz1836/go-pandadoc"><img src="https://codecov.io/gh/mrz1836/go-pandadoc/branch/master/graph/badge.svg?style=flat-square" alt="Coverage"></a>
     </td>
   </tr>

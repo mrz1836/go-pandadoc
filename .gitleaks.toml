@@ -1,8 +1,0 @@
-# Gitleaks configuration for go-pandadoc
-# Allowlist the OpenAPI specification file which contains example credentials
-# from the official PandaDoc OpenAPI spec, not actual credentials
-
-[allowlist]
-paths = [
-  "internal/spec/openapi/pandadoc-openapi-7\\.18\\.0\\.json"
-]
