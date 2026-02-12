@@ -9,13 +9,13 @@ import (
 	"strconv"
 )
 
-// DocumentsService handles document-related PandaDoc API calls.
-type DocumentsService struct {
+// documentsService implements DocumentsService.
+type documentsService struct {
 	client *Client
 }
 
 // List lists/searches documents.
-func (s *DocumentsService) List(ctx context.Context, opts *ListDocumentsOptions) (*DocumentListResponse, error) {
+func (s *documentsService) List(ctx context.Context, opts *ListDocumentsOptions) (*DocumentListResponse, error) {
 	query := url.Values{}
 	if opts != nil {
 		buildDocumentListQuery(query, opts)
@@ -98,7 +98,7 @@ func setMetadataIfNotEmpty(query url.Values, metadata map[string]string) {
 }
 
 // Create creates a new document from JSON payload.
-func (s *DocumentsService) Create(ctx context.Context, reqBody DocumentCreateRequest) (*DocumentCreateResponse, error) {
+func (s *documentsService) Create(ctx context.Context, reqBody DocumentCreateRequest) (*DocumentCreateResponse, error) {
 	if reqBody == nil {
 		return nil, ErrNilRequest
 	}
@@ -119,7 +119,7 @@ func (s *DocumentsService) Create(ctx context.Context, reqBody DocumentCreateReq
 }
 
 // CreateFromUpload creates a new document from multipart upload payload.
-func (s *DocumentsService) CreateFromUpload(ctx context.Context, reqBody *CreateDocumentFromUploadRequest) (*DocumentCreateResponse, error) {
+func (s *documentsService) CreateFromUpload(ctx context.Context, reqBody *CreateDocumentFromUploadRequest) (*DocumentCreateResponse, error) {
 	if reqBody == nil {
 		return nil, ErrNilRequest
 	}
@@ -155,7 +155,7 @@ func (s *DocumentsService) CreateFromUpload(ctx context.Context, reqBody *Create
 }
 
 // Status returns a document status payload.
-func (s *DocumentsService) Status(ctx context.Context, id string) (*DocumentStatusResponse, error) {
+func (s *documentsService) Status(ctx context.Context, id string) (*DocumentStatusResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (s *DocumentsService) Status(ctx context.Context, id string) (*DocumentStat
 }
 
 // Delete deletes a document.
-func (s *DocumentsService) Delete(ctx context.Context, id string) error {
+func (s *documentsService) Delete(ctx context.Context, id string) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -189,7 +189,7 @@ func (s *DocumentsService) Delete(ctx context.Context, id string) error {
 }
 
 // Update updates a document and returns no payload on success.
-func (s *DocumentsService) Update(ctx context.Context, id string, reqBody DocumentUpdateRequest) error {
+func (s *documentsService) Update(ctx context.Context, id string, reqBody DocumentUpdateRequest) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -208,7 +208,7 @@ func (s *DocumentsService) Update(ctx context.Context, id string, reqBody Docume
 }
 
 // ESignDisclosure gets e-sign disclosure settings for a document.
-func (s *DocumentsService) ESignDisclosure(ctx context.Context, documentID string) (*DocumentESignDisclosureResponse, error) {
+func (s *documentsService) ESignDisclosure(ctx context.Context, documentID string) (*DocumentESignDisclosureResponse, error) {
 	escapedID, err := escapePathParam(documentID)
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (s *DocumentsService) ESignDisclosure(ctx context.Context, documentID strin
 }
 
 // ChangeStatus changes a document status.
-func (s *DocumentsService) ChangeStatus(ctx context.Context, id string, reqBody *ChangeDocumentStatusRequest) error {
+func (s *documentsService) ChangeStatus(ctx context.Context, id string, reqBody *ChangeDocumentStatusRequest) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -247,7 +247,7 @@ func (s *DocumentsService) ChangeStatus(ctx context.Context, id string, reqBody 
 }
 
 // ChangeStatusWithUpload changes status with multipart payload.
-func (s *DocumentsService) ChangeStatusWithUpload(ctx context.Context, id string, reqBody *ChangeDocumentStatusWithUploadRequest) error {
+func (s *documentsService) ChangeStatusWithUpload(ctx context.Context, id string, reqBody *ChangeDocumentStatusWithUploadRequest) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -294,7 +294,7 @@ func (s *DocumentsService) ChangeStatusWithUpload(ctx context.Context, id string
 }
 
 // RevertToDraft reverts a document to draft.
-func (s *DocumentsService) RevertToDraft(ctx context.Context, id string) (*DocumentRevertToDraftResponse, error) {
+func (s *documentsService) RevertToDraft(ctx context.Context, id string) (*DocumentRevertToDraftResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -314,7 +314,7 @@ func (s *DocumentsService) RevertToDraft(ctx context.Context, id string) (*Docum
 }
 
 // Details returns document details.
-func (s *DocumentsService) Details(ctx context.Context, id string) (*DocumentDetailsResponse, error) {
+func (s *documentsService) Details(ctx context.Context, id string) (*DocumentDetailsResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -333,7 +333,7 @@ func (s *DocumentsService) Details(ctx context.Context, id string) (*DocumentDet
 }
 
 // Send sends a document.
-func (s *DocumentsService) Send(ctx context.Context, id string, reqBody DocumentSendRequest) (*DocumentSendResponse, error) {
+func (s *documentsService) Send(ctx context.Context, id string, reqBody DocumentSendRequest) (*DocumentSendResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -356,7 +356,7 @@ func (s *DocumentsService) Send(ctx context.Context, id string, reqBody Document
 }
 
 // CreateEditingSession creates an editing session for a document.
-func (s *DocumentsService) CreateEditingSession(ctx context.Context, id string, reqBody CreateDocumentEditingSessionRequest) (*CreateDocumentEditingSessionResponse, error) {
+func (s *documentsService) CreateEditingSession(ctx context.Context, id string, reqBody CreateDocumentEditingSessionRequest) (*CreateDocumentEditingSessionResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -380,7 +380,7 @@ func (s *DocumentsService) CreateEditingSession(ctx context.Context, id string, 
 }
 
 // CreateSession creates an embedded signing session for a document.
-func (s *DocumentsService) CreateSession(ctx context.Context, id string, reqBody CreateDocumentSessionRequest) (*CreateDocumentSessionResponse, error) {
+func (s *documentsService) CreateSession(ctx context.Context, id string, reqBody CreateDocumentSessionRequest) (*CreateDocumentSessionResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -404,7 +404,7 @@ func (s *DocumentsService) CreateSession(ctx context.Context, id string, reqBody
 }
 
 // Download downloads a completed document PDF.
-func (s *DocumentsService) Download(ctx context.Context, id string) (*DownloadResponse, error) {
+func (s *documentsService) Download(ctx context.Context, id string) (*DownloadResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -419,7 +419,7 @@ func (s *DocumentsService) Download(ctx context.Context, id string) (*DownloadRe
 }
 
 // DownloadProtected downloads a password-protected document PDF.
-func (s *DocumentsService) DownloadProtected(ctx context.Context, id string) (*DownloadResponse, error) {
+func (s *documentsService) DownloadProtected(ctx context.Context, id string) (*DownloadResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -434,7 +434,7 @@ func (s *DocumentsService) DownloadProtected(ctx context.Context, id string) (*D
 }
 
 // TransferOwnership transfers ownership of a single document.
-func (s *DocumentsService) TransferOwnership(ctx context.Context, id string, reqBody TransferDocumentOwnershipRequest) error {
+func (s *documentsService) TransferOwnership(ctx context.Context, id string, reqBody TransferDocumentOwnershipRequest) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -453,7 +453,7 @@ func (s *DocumentsService) TransferOwnership(ctx context.Context, id string, req
 }
 
 // TransferAllOwnership transfers ownership for all documents.
-func (s *DocumentsService) TransferAllOwnership(ctx context.Context, reqBody TransferAllDocumentsOwnershipRequest) error {
+func (s *documentsService) TransferAllOwnership(ctx context.Context, reqBody TransferAllDocumentsOwnershipRequest) error {
 	if reqBody == nil {
 		return ErrNilRequest
 	}
@@ -468,7 +468,7 @@ func (s *DocumentsService) TransferAllOwnership(ctx context.Context, reqBody Tra
 }
 
 // MoveToFolder moves a document to a folder.
-func (s *DocumentsService) MoveToFolder(ctx context.Context, id, folderID string) error {
+func (s *documentsService) MoveToFolder(ctx context.Context, id, folderID string) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -487,7 +487,7 @@ func (s *DocumentsService) MoveToFolder(ctx context.Context, id, folderID string
 }
 
 // AppendContentLibraryItem appends a content library item to a document.
-func (s *DocumentsService) AppendContentLibraryItem(ctx context.Context, id string, reqBody AppendContentLibraryItemRequest) (*AppendContentLibraryItemResponse, error) {
+func (s *documentsService) AppendContentLibraryItem(ctx context.Context, id string, reqBody AppendContentLibraryItemRequest) (*AppendContentLibraryItemResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err

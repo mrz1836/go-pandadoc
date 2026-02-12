@@ -29,12 +29,13 @@ type Client struct {
 
 	apiKey      string
 	accessToken string
+	logger      Logger
 
-	documents            *DocumentsService
-	productCatalog       *ProductCatalogService
-	oauth                *OAuthService
-	webhookSubscriptions *WebhookSubscriptionsService
-	webhookEvents        *WebhookEventsService
+	documents            DocumentsService
+	productCatalog       ProductCatalogService
+	oauth                OAuthService
+	webhookSubscriptions WebhookSubscriptionsService
+	webhookEvents        WebhookEventsService
 }
 
 // NewClient creates a new PandaDoc client.
@@ -76,13 +77,14 @@ func NewClient(opts ...Option) (*Client, error) {
 		retryPolicy: cfg.retryPolicy.normalize(),
 		apiKey:      cfg.apiKey,
 		accessToken: cfg.accessToken,
+		logger:      cfg.logger,
 	}
 
-	client.documents = &DocumentsService{client: client}
-	client.productCatalog = &ProductCatalogService{client: client}
-	client.oauth = &OAuthService{client: client}
-	client.webhookSubscriptions = &WebhookSubscriptionsService{client: client}
-	client.webhookEvents = &WebhookEventsService{client: client}
+	client.documents = &documentsService{client: client}
+	client.productCatalog = &productCatalogService{client: client}
+	client.oauth = &oauthService{client: client}
+	client.webhookSubscriptions = &webhookSubscriptionsService{client: client}
+	client.webhookEvents = &webhookEventsService{client: client}
 
 	return client, nil
 }
@@ -98,27 +100,27 @@ func NewClientWithAccessToken(token string, opts ...Option) (*Client, error) {
 }
 
 // Documents exposes document-related endpoints.
-func (c *Client) Documents() *DocumentsService {
+func (c *Client) Documents() DocumentsService {
 	return c.documents
 }
 
 // ProductCatalog exposes product-catalog endpoints.
-func (c *Client) ProductCatalog() *ProductCatalogService {
+func (c *Client) ProductCatalog() ProductCatalogService {
 	return c.productCatalog
 }
 
 // OAuth exposes OAuth token operations.
-func (c *Client) OAuth() *OAuthService {
+func (c *Client) OAuth() OAuthService {
 	return c.oauth
 }
 
 // WebhookSubscriptions exposes webhook-subscription endpoints.
-func (c *Client) WebhookSubscriptions() *WebhookSubscriptionsService {
+func (c *Client) WebhookSubscriptions() WebhookSubscriptionsService {
 	return c.webhookSubscriptions
 }
 
 // WebhookEvents exposes webhook-event endpoints.
-func (c *Client) WebhookEvents() *WebhookEventsService {
+func (c *Client) WebhookEvents() WebhookEventsService {
 	return c.webhookEvents
 }
 
@@ -144,4 +146,22 @@ func normalizeBaseURL(raw string) (*url.URL, error) {
 	}
 
 	return u, nil
+}
+
+func (c *Client) logDebug(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Debugf(format, args...)
+	}
+}
+
+func (c *Client) logInfo(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Infof(format, args...)
+	}
+}
+
+func (c *Client) logError(format string, args ...interface{}) {
+	if c.logger != nil {
+		c.logger.Errorf(format, args...)
+	}
 }

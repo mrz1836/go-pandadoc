@@ -6,13 +6,13 @@ import (
 	"net/url"
 )
 
-// OAuthService handles OAuth token exchange operations.
-type OAuthService struct {
+// oauthService implements OAuthService.
+type oauthService struct {
 	client *Client
 }
 
 // Token exchanges either an authorization code or refresh token for an access token.
-func (s *OAuthService) Token(ctx context.Context, req *OAuthTokenRequest) (*OAuthTokenResponse, error) {
+func (s *oauthService) Token(ctx context.Context, req *OAuthTokenRequest) (*OAuthTokenResponse, error) {
 	if req == nil {
 		return nil, ErrNilRequest
 	}

@@ -7,13 +7,13 @@ import (
 	"strconv"
 )
 
-// WebhookSubscriptionsService handles webhook subscription APIs.
-type WebhookSubscriptionsService struct {
+// webhookSubscriptionsService implements WebhookSubscriptionsService.
+type webhookSubscriptionsService struct {
 	client *Client
 }
 
 // List lists webhook subscriptions.
-func (s *WebhookSubscriptionsService) List(ctx context.Context, opts *ListWebhookSubscriptionsOptions) (*WebhookSubscriptionListResponse, error) {
+func (s *webhookSubscriptionsService) List(ctx context.Context, opts *ListWebhookSubscriptionsOptions) (*WebhookSubscriptionListResponse, error) {
 	query := url.Values{}
 	if opts == nil {
 		opts = &ListWebhookSubscriptionsOptions{}
@@ -39,7 +39,7 @@ func (s *WebhookSubscriptionsService) List(ctx context.Context, opts *ListWebhoo
 }
 
 // Create creates a webhook subscription.
-func (s *WebhookSubscriptionsService) Create(ctx context.Context, reqBody *WebhookSubscriptionRequest) (*WebhookSubscription, error) {
+func (s *webhookSubscriptionsService) Create(ctx context.Context, reqBody *WebhookSubscriptionRequest) (*WebhookSubscription, error) {
 	if reqBody == nil {
 		return nil, ErrNilRequest
 	}
@@ -59,7 +59,7 @@ func (s *WebhookSubscriptionsService) Create(ctx context.Context, reqBody *Webho
 }
 
 // Get gets a webhook subscription by ID.
-func (s *WebhookSubscriptionsService) Get(ctx context.Context, id string) (*WebhookSubscription, error) {
+func (s *webhookSubscriptionsService) Get(ctx context.Context, id string) (*WebhookSubscription, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func (s *WebhookSubscriptionsService) Get(ctx context.Context, id string) (*Webh
 }
 
 // Update updates a webhook subscription.
-func (s *WebhookSubscriptionsService) Update(ctx context.Context, id string, reqBody *WebhookSubscriptionRequest) (*WebhookSubscription, error) {
+func (s *webhookSubscriptionsService) Update(ctx context.Context, id string, reqBody *WebhookSubscriptionRequest) (*WebhookSubscription, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (s *WebhookSubscriptionsService) Update(ctx context.Context, id string, req
 }
 
 // Delete deletes a webhook subscription.
-func (s *WebhookSubscriptionsService) Delete(ctx context.Context, id string) error {
+func (s *webhookSubscriptionsService) Delete(ctx context.Context, id string) error {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return err
@@ -116,7 +116,7 @@ func (s *WebhookSubscriptionsService) Delete(ctx context.Context, id string) err
 }
 
 // RegenerateSharedKey regenerates a webhook subscription shared key.
-func (s *WebhookSubscriptionsService) RegenerateSharedKey(ctx context.Context, id string) (*UpdateWebhookSubscriptionSharedKeyResponse, error) {
+func (s *webhookSubscriptionsService) RegenerateSharedKey(ctx context.Context, id string) (*UpdateWebhookSubscriptionSharedKeyResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err
@@ -134,13 +134,13 @@ func (s *WebhookSubscriptionsService) RegenerateSharedKey(ctx context.Context, i
 	return &out, nil
 }
 
-// WebhookEventsService handles webhook event APIs.
-type WebhookEventsService struct {
+// webhookEventsService implements WebhookEventsService.
+type webhookEventsService struct {
 	client *Client
 }
 
 // List lists webhook events.
-func (s *WebhookEventsService) List(ctx context.Context, opts *ListWebhookEventsOptions) (*WebhookEventListResponse, error) {
+func (s *webhookEventsService) List(ctx context.Context, opts *ListWebhookEventsOptions) (*WebhookEventListResponse, error) {
 	query := url.Values{}
 	if opts == nil {
 		opts = &ListWebhookEventsOptions{}
@@ -175,7 +175,7 @@ func (s *WebhookEventsService) List(ctx context.Context, opts *ListWebhookEvents
 }
 
 // Get gets webhook event details.
-func (s *WebhookEventsService) Get(ctx context.Context, id string) (*WebhookEventDetailsResponse, error) {
+func (s *webhookEventsService) Get(ctx context.Context, id string) (*WebhookEventDetailsResponse, error) {
 	escapedID, err := escapePathParam(id)
 	if err != nil {
 		return nil, err

@@ -7,13 +7,13 @@ import (
 	"strconv"
 )
 
-// ProductCatalogService handles product-catalog API operations.
-type ProductCatalogService struct {
+// productCatalogService implements ProductCatalogService.
+type productCatalogService struct {
 	client *Client
 }
 
 // Search searches catalog items.
-func (s *ProductCatalogService) Search(ctx context.Context, opts *SearchProductCatalogItemsOptions) (*SearchProductCatalogItemsResponse, error) {
+func (s *productCatalogService) Search(ctx context.Context, opts *SearchProductCatalogItemsOptions) (*SearchProductCatalogItemsResponse, error) {
 	query := url.Values{}
 	if opts == nil {
 		opts = &SearchProductCatalogItemsOptions{}
@@ -61,7 +61,7 @@ func (s *ProductCatalogService) Search(ctx context.Context, opts *SearchProductC
 }
 
 // Create creates a catalog item.
-func (s *ProductCatalogService) Create(ctx context.Context, reqBody CreateProductCatalogItemRequest) (*ProductCatalogItemResponse, error) {
+func (s *productCatalogService) Create(ctx context.Context, reqBody CreateProductCatalogItemRequest) (*ProductCatalogItemResponse, error) {
 	if reqBody == nil {
 		return nil, ErrNilRequest
 	}
@@ -81,7 +81,7 @@ func (s *ProductCatalogService) Create(ctx context.Context, reqBody CreateProduc
 }
 
 // Get gets a catalog item by UUID.
-func (s *ProductCatalogService) Get(ctx context.Context, itemUUID string) (*ProductCatalogItemResponse, error) {
+func (s *productCatalogService) Get(ctx context.Context, itemUUID string) (*ProductCatalogItemResponse, error) {
 	escapedID, err := escapePathParam(itemUUID)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (s *ProductCatalogService) Get(ctx context.Context, itemUUID string) (*Prod
 }
 
 // Update updates a catalog item by UUID.
-func (s *ProductCatalogService) Update(ctx context.Context, itemUUID string, reqBody UpdateProductCatalogItemRequest) (*ProductCatalogItemResponse, error) {
+func (s *productCatalogService) Update(ctx context.Context, itemUUID string, reqBody UpdateProductCatalogItemRequest) (*ProductCatalogItemResponse, error) {
 	escapedID, err := escapePathParam(itemUUID)
 	if err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (s *ProductCatalogService) Update(ctx context.Context, itemUUID string, req
 }
 
 // Delete deletes a catalog item by UUID.
-func (s *ProductCatalogService) Delete(ctx context.Context, itemUUID string) error {
+func (s *productCatalogService) Delete(ctx context.Context, itemUUID string) error {
 	escapedID, err := escapePathParam(itemUUID)
 	if err != nil {
 		return err
