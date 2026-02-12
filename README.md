@@ -279,6 +279,43 @@ if len(events.Items) > 0 {
 }
 ```
 
+### Unit Testing & Mocking
+
+The SDK now defines interfaces for all service interactions, making it easy to mock the client in your tests.
+
+```go
+// Create a mock struct that implements pandadoc.DocumentsService
+type mockDocuments struct {
+    pandadoc.DocumentsService // Embed interface to skip implementing all methods if not needed
+}
+
+func (m *mockDocuments) List(ctx context.Context, opts *pandadoc.ListDocumentsOptions) (*pandadoc.DocumentListResponse, error) {
+    return &pandadoc.DocumentListResponse{
+        Results: []pandadoc.DocumentSummary{
+            {ID: "mock-doc-1", Name: "Mock Document"},
+        },
+    }, nil
+}
+```
+
+### Observability
+
+You can inject a custom logger to monitor SDK operations. The logger must implement the `pandadoc.Logger` interface.
+
+```go
+type myLogger struct{}
+
+func (l *myLogger) Debugf(format string, args ...interface{}) { log.Printf("[DEBUG] "+format, args...) }
+func (l *myLogger) Infof(format string, args ...interface{})  { log.Printf("[INFO] "+format, args...) }
+func (l *myLogger) Errorf(format string, args ...interface{}) { log.Printf("[ERROR] "+format, args...) }
+
+func main() {
+    client, _ := pandadoc.NewClientWithAPIKey("key",
+        pandadoc.WithLogger(&myLogger{}),
+    )
+}
+```
+
 <br/>
 
 ## 🧪 Examples & Tests
