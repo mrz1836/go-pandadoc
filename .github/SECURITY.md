@@ -1,11 +1,11 @@
 # 🔐 Security Policy
 
-Security is a priority. We maintain a proactive stance to identify and fix vulnerabilities in **postmark**.
+Security is a priority. We maintain a proactive stance to identify and fix vulnerabilities in **go-pandadoc**.
 
 <br/>
 
 ## 🛠️ Supported & Maintained Versions
-Any released version of **postmark** that is not marked as deprecated is actively supported and maintained.
+Any released version of **go-pandadoc** that is not marked as deprecated is actively supported and maintained.
 
 <br/>
 
@@ -14,7 +14,7 @@ Any released version of **postmark** that is not marked as deprecated is activel
 If you’ve found a security issue, **please don’t open a public issue or PR**.
 
 Instead, send a private email to:
-📧 [postmark@mrz1818.com](mailto:postmark@mrz1818.com)
+📧 [go-pandadoc@mrz1818.com](mailto:go-pandadoc@mrz1818.com)
 
 Include the following:
 

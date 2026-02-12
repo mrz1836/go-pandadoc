@@ -61,25 +61,37 @@
 
 <table align="center">
   <tr>
-    <td align="center" width="33%">
-       🚀&nbsp;<a href="#-installation"><code>Installation</code></a>
+    <td align="center" width="20%">
+       📦&nbsp;<a href="#-installation"><code>Installation</code></a>
     </td>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
+       🚀&nbsp;<a href="#-quick-start"><code>Quick&nbsp;Start</code></a>
+    </td>
+    <td align="center" width="20%">
+       📚&nbsp;<a href="#-features"><code>Features</code></a>
+    </td>
+    <td align="center" width="20%">
        🧪&nbsp;<a href="#-examples--tests"><code>Examples&nbsp;&&nbsp;Tests</code></a>
     </td>
-    <td align="center" width="33%">
+    <td align="center" width="20%">
        📚&nbsp;<a href="#-documentation"><code>Documentation</code></a>
     </td>
   </tr>
   <tr>
     <td align="center">
+      🛠️&nbsp;<a href="#%EF%B8%8F-code-standards"><code>Code&nbsp;Standards</code></a>
+    </td>
+    <td align="center">
+      🤖&nbsp;<a href="#-ai-usage--assistant-guidelines"><code>AI&nbsp;Guidelines</code></a>
+    </td>
+    <td align="center">
+       👥&nbsp;<a href="#-maintainers"><code>Maintainers</code></a>
+    </td>
+    <td align="center">
        🤝&nbsp;<a href="#-contributing"><code>Contributing</code></a>
     </td>
     <td align="center">
-      🛠️&nbsp;<a href="#-code-standards"><code>Code&nbsp;Standards</code></a>
-    </td>
-    <td align="center">
-      ⚖️&nbsp;<a href="#-license"><code>License</code></a>
+      📝&nbsp;<a href="#-license"><code>License</code></a>
     </td>
   </tr>
 </table>
@@ -186,35 +198,20 @@ client, err := pandadoc.NewClient("your-api-key",
 
 <br/>
 
+## Examples & Tests
 ## 🧪 Examples & Tests
 
-### Running Examples
+All unit tests and fuzz tests run via [GitHub Actions](https://github.com/mrz1836/go-pandadoc/actions) and use [Go version 1.24.x](https://go.dev/doc/go1.24). View the [configuration file](.github/workflows/fortress.yml).
 
-```bash
-# Set your API key
-export PANDADOC_API_KEY="your-api-key"
+Run all tests (fast):
 
-# List documents
-go run examples/list_documents/main.go
-
-# Get document fields
-go run examples/get_document_fields/main.go <document-id>
-
-# List catalog items
-go run examples/list_catalog/main.go
+```bash script
+magex test
 ```
 
-### Running Tests
-
-```bash
-# Run all tests
-go test ./...
-
-# Run tests with coverage
-go test -cover ./...
-
-# Run tests with race detection
-go test -race ./...
+Run all tests with race detector (slower):
+```bash script
+magex test:race
 ```
 
 <br/>
@@ -226,46 +223,37 @@ go test -race ./...
 
 <br/>
 
-## 🤝 Contributing
-
-Contributions are welcome! Please read the [contributing guidelines](CONTRIBUTING.md) first.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-<br/>
-
 ## 🛠️ Code Standards
-
-This project follows:
-
-- [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
-- [Effective Go](https://golang.org/doc/effective_go)
-- [Conventional Commits](https://www.conventionalcommits.org/)
+Read more about this Go project's [code standards](.github/CODE_STANDARDS.md).
 
 <br/>
 
-## ⚖️ License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🤖 AI Usage & Assistant Guidelines
+Read the [AI Usage & Assistant Guidelines](.github/tech-conventions/ai-compliance.md) for details on how AI is used in this project and how to interact with the AI assistants.
 
 <br/>
 
 ## 👥 Maintainers
-
 | [<img src="https://github.com/mrz1836.png" height="50" alt="MrZ" />](https://github.com/mrz1836) |
 |:------------------------------------------------------------------------------------------------:|
-| [MrZ](https://github.com/mrz1836)                                                                |
+|                                [MrZ](https://github.com/mrz1836)                                 |
 
 <br/>
 
----
+## 🤝 Contributing
+View the [contributing guidelines](.github/CONTRIBUTING.md) and please follow the [code of conduct](.github/CODE_OF_CONDUCT.md).
 
-<div align="center">
+### How can I help?
+All kinds of contributions are welcome :raised_hands:!
+The most basic way to show your support is to star :star2: the project, or to raise issues :speech_balloon:.
+You can also support this project by [becoming a sponsor on GitHub](https://github.com/sponsors/mrz1836) :clap:
+or by making a [**bitcoin donation**](https://mrz1818.com/?tab=tips&utm_source=github&utm_medium=sponsor-link&utm_campaign=go-pandadoc&utm_term=go-pandadoc&utm_content=go-pandadoc) to ensure this journey continues indefinitely! :rocket:
 
-**This is an unofficial SDK and is not affiliated with PandaDoc.**
 
-</div>
+[![Stars](https://img.shields.io/github/stars/mrz1836/go-pandadoc?label=Please%20like%20us&style=social)](https://github.com/mrz1836/go-pandadoc/stargazers)
+
+<br/>
+
+## 📝 License
+
+[![License](https://img.shields.io/github/license/mrz1836/go-pandadoc.svg?style=flat)](LICENSE)
