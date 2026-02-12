@@ -22,6 +22,13 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
+// WithUserAgent sets a custom User-Agent header.
+func WithUserAgent(userAgent string) Option {
+	return func(c *Config) {
+		c.UserAgent = userAgent
+	}
+}
+
 // WithTransport sets a custom HTTP transport.
 func WithTransport(transport http.RoundTripper) Option {
 	return func(c *Config) {

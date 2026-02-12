@@ -3,6 +3,8 @@ package config
 import (
 	"net/http"
 	"time"
+
+	"github.com/mrz1836/go-pandadoc/errors"
 )
 
 // Package config provides configuration management for the PandaDoc API client.
@@ -12,6 +14,7 @@ type Config struct {
 	APIKey    string            // PandaDoc API Key
 	BaseURL   string            // Base URL for the PandaDoc API (default: https://api.pandadoc.com/public/v1/)
 	Timeout   time.Duration     // HTTP request timeout
+	UserAgent string            // Custom User-Agent header (optional)
 	Transport http.RoundTripper // Custom HTTP transport (optional)
 }
 
@@ -32,10 +35,10 @@ func New(apiKey string, options ...Option) *Config {
 // Validate checks if the configuration is valid.
 func (c *Config) Validate() error {
 	if c.APIKey == "" {
-		return ErrMissingAPIKey
+		return errors.ErrMissingAPIKey
 	}
 	if c.BaseURL == "" {
-		return ErrMissingBaseURL
+		return errors.ErrMissingBaseURL
 	}
 	return nil
 }
