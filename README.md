@@ -2,7 +2,7 @@
 
 # 📄&nbsp;&nbsp;go-pandadoc
 
-**Unofficial Go SDK for the PandaDoc API.**
+**Unofficial Go SDK for the [PandaDoc API](https://developers.pandadoc.com/reference/about).**
 
 <br/>
 
@@ -91,15 +91,6 @@
     </td>
     <td align="center">
        🤝&nbsp;<a href="#-contributing"><code>Contributing</code></a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      📝&nbsp;<a href="#-license"><code>License</code></a>
-    </td>
-    <td align="center">
-    </td>
-    <td align="center">
     </td>
   </tr>
 </table>
