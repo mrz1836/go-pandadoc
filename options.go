@@ -18,6 +18,7 @@ type clientConfig struct {
 	retryPolicy RetryPolicy
 	apiKey      string
 	accessToken string
+	logger      Logger
 }
 
 // RetryPolicy controls transport-level retries.
@@ -129,6 +130,21 @@ func WithAPIKey(apiKey string) Option {
 func WithAccessToken(token string) Option {
 	return func(cfg *clientConfig) error {
 		cfg.accessToken = strings.TrimSpace(token)
+		return nil
+	}
+}
+
+// Logger defines the logging interface used by the client.
+type Logger interface {
+	Debugf(format string, args ...interface{})
+	Infof(format string, args ...interface{})
+	Errorf(format string, args ...interface{})
+}
+
+// WithLogger sets a custom logger.
+func WithLogger(logger Logger) Option {
+	return func(cfg *clientConfig) error {
+		cfg.logger = logger
 		return nil
 	}
 }

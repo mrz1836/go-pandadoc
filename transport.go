@@ -90,22 +90,29 @@ func (c *Client) do(ctx context.Context, req *request) (*http.Response, error) {
 }
 
 func (c *Client) doAttemptWithHandling(ctx context.Context, req *request, fullURL string, bodyBytes []byte, contentType string, attempt int) (bool, *http.Response, error) {
+	c.logDebug("API Request: %s %s (attempt %d)", req.method, fullURL, attempt+1)
+
 	resp, retryable, err := c.doAttempt(ctx, req, fullURL, bodyBytes, contentType)
 	if err != nil {
+		c.logError("Request failed: %v", err)
 		if !retryable || !c.shouldRetryOnError(attempt, err) {
 			return false, nil, err
 		}
+		c.logInfo("Retrying after error: %v", err)
 		if sleepErr := sleepWithContext(ctx, c.backoff(attempt)); sleepErr != nil {
 			return false, nil, sleepErr
 		}
 		return false, nil, nil
 	}
 
+	c.logDebug("API Response: %d %s", resp.StatusCode, resp.Status)
+
 	if c.shouldRetryOnStatus(attempt, resp) {
 		retryDelay := c.backoff(attempt)
 		if retryAfter, ok := parseRetryAfter(resp.Header.Get("Retry-After")); ok {
 			retryDelay = retryAfter
 		}
+		c.logInfo("Retrying on status %d, waiting %v", resp.StatusCode, retryDelay)
 		_ = drainAndClose(resp.Body)
 
 		if sleepErr := sleepWithContext(ctx, retryDelay); sleepErr != nil {
@@ -116,6 +123,7 @@ func (c *Client) doAttemptWithHandling(ctx context.Context, req *request, fullUR
 
 	if !statusExpected(resp.StatusCode, req.expectedStatus) {
 		apiErr := parseAPIError(resp)
+		c.logError("API Error: %v", apiErr)
 		_ = resp.Body.Close()
 		return false, nil, apiErr
 	}
@@ -164,15 +172,10 @@ func (c *Client) decodeJSON(ctx context.Context, req *request, out any) error {
 		return nil
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("read response body: %w", err)
-	}
-	if len(body) == 0 {
-		return nil
-	}
-
-	if err := json.Unmarshal(body, out); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		if err == io.EOF {
+			return nil
+		}
 		return fmt.Errorf("decode response body: %w", err)
 	}
 
