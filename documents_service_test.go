@@ -3,6 +3,7 @@ package pandadoc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"mime"
 	"mime/multipart"
@@ -445,5 +446,203 @@ func TestDocumentsService_CreateRequestBodyJSON(t *testing.T) {
 
 	if _, err := client.Documents().Create(context.Background(), DocumentCreateRequest{"name": "doc"}); err != nil {
 		t.Fatalf("Create failed: %v", err)
+	}
+}
+
+func TestDocumentsService_ErrorPropagation(t *testing.T) {
+	t.Parallel()
+
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = io.WriteString(w, `{"detail":"boom"}`)
+	})
+
+	type testCase struct {
+		name string
+		run  func() error
+	}
+
+	cases := []testCase{
+		{
+			name: "List",
+			run: func() error {
+				_, err := client.Documents().List(context.Background(), nil)
+				return err
+			},
+		},
+		{
+			name: "Create",
+			run: func() error {
+				_, err := client.Documents().Create(context.Background(), DocumentCreateRequest{"name": "x"})
+				return err
+			},
+		},
+		{
+			name: "CreateFromUpload",
+			run: func() error {
+				_, err := client.Documents().CreateFromUpload(context.Background(), &CreateDocumentFromUploadRequest{File: strings.NewReader("x")})
+				return err
+			},
+		},
+		{
+			name: "Status",
+			run: func() error {
+				_, err := client.Documents().Status(context.Background(), "d1")
+				return err
+			},
+		},
+		{
+			name: "Update",
+			run: func() error {
+				return client.Documents().Update(context.Background(), "d1", DocumentUpdateRequest{"name": "x"})
+			},
+		},
+		{
+			name: "ESignDisclosure",
+			run: func() error {
+				_, err := client.Documents().ESignDisclosure(context.Background(), "d1")
+				return err
+			},
+		},
+		{
+			name: "ChangeStatusWithUpload",
+			run: func() error {
+				return client.Documents().ChangeStatusWithUpload(context.Background(), "d1", &ChangeDocumentStatusWithUploadRequest{Status: DocumentStatusCompleted, File: strings.NewReader("x")})
+			},
+		},
+		{
+			name: "RevertToDraft",
+			run: func() error {
+				_, err := client.Documents().RevertToDraft(context.Background(), "d1")
+				return err
+			},
+		},
+		{
+			name: "Details",
+			run: func() error {
+				_, err := client.Documents().Details(context.Background(), "d1")
+				return err
+			},
+		},
+		{
+			name: "Send",
+			run: func() error {
+				_, err := client.Documents().Send(context.Background(), "d1", DocumentSendRequest{"silent": true})
+				return err
+			},
+		},
+		{
+			name: "CreateEditingSession",
+			run: func() error {
+				_, err := client.Documents().CreateEditingSession(context.Background(), "d1", CreateDocumentEditingSessionRequest{"member": "x"})
+				return err
+			},
+		},
+		{
+			name: "CreateSession",
+			run: func() error {
+				_, err := client.Documents().CreateSession(context.Background(), "d1", CreateDocumentSessionRequest{"recipient": "x"})
+				return err
+			},
+		},
+		{
+			name: "AppendContentLibraryItem",
+			run: func() error {
+				_, err := client.Documents().AppendContentLibraryItem(context.Background(), "d1", AppendContentLibraryItemRequest{"id": "c1"})
+				return err
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if err := tc.run(); err == nil {
+				t.Fatalf("expected error")
+			}
+		})
+	}
+}
+
+//nolint:gocognit // Test function that validates multiple upload scenarios
+func TestDocumentsService_UploadDefaultsAndValidation(t *testing.T) {
+	t.Parallel()
+
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		mediaType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+		if err != nil {
+			t.Fatalf("parse content-type: %v", err)
+		}
+		if mediaType != "multipart/form-data" {
+			t.Fatalf("expected multipart, got %s", mediaType)
+		}
+
+		mr := multipart.NewReader(r.Body, params["boundary"])
+		fields := make(map[string]string)
+		var fileField, fileName string
+		for {
+			part, err := mr.NextPart()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			if err != nil {
+				t.Fatalf("read multipart: %v", err)
+			}
+			if part.FileName() != "" {
+				fileField = part.FormName()
+				fileName = part.FileName()
+				continue
+			}
+			b, err := io.ReadAll(part)
+			if err != nil {
+				t.Fatalf("read multipart field: %v", err)
+			}
+			fields[part.FormName()] = string(b)
+		}
+
+		if fileField != "file" || fileName != "upload.bin" {
+			t.Fatalf("unexpected upload defaults: field=%s file=%s", fileField, fileName)
+		}
+
+		switch {
+		case r.Method == http.MethodPost && strings.Contains(r.URL.RawQuery, "upload"):
+			if fields["name"] != "upload-default" {
+				t.Fatalf("missing create upload field: %v", fields)
+			}
+			w.WriteHeader(http.StatusCreated)
+			_, _ = io.WriteString(w, `{"id":"u1"}`)
+		case r.Method == http.MethodPatch && strings.Contains(r.URL.RawQuery, "upload"):
+			if fields["status"] != "2" || fields["note"] != "note-text" || fields["notify_recipients"] != "true" || fields["custom"] != "value" {
+				t.Fatalf("unexpected status upload fields: %v", fields)
+			}
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			t.Fatalf("unexpected request: %s %s?%s", r.Method, r.URL.Path, r.URL.RawQuery)
+		}
+	})
+
+	if _, err := client.Documents().CreateFromUpload(context.Background(), &CreateDocumentFromUploadRequest{
+		File:   strings.NewReader("pdf"),
+		Fields: map[string]string{"name": "upload-default"},
+	}); err != nil {
+		t.Fatalf("CreateFromUpload failed: %v", err)
+	}
+
+	notify := true
+	if err := client.Documents().ChangeStatusWithUpload(context.Background(), "u1", &ChangeDocumentStatusWithUploadRequest{
+		Status:           DocumentStatusCompleted,
+		Note:             "note-text",
+		NotifyRecipients: &notify,
+		Fields:           map[string]string{"custom": "value"},
+		File:             strings.NewReader("pdf-2"),
+	}); err != nil {
+		t.Fatalf("ChangeStatusWithUpload failed: %v", err)
+	}
+
+	if _, err := client.Documents().CreateFromUpload(context.Background(), nil); !errors.Is(err, ErrNilRequest) {
+		t.Fatalf("expected ErrNilRequest, got %v", err)
+	}
+	if err := client.Documents().ChangeStatusWithUpload(context.Background(), "u1", nil); !errors.Is(err, ErrNilRequest) {
+		t.Fatalf("expected ErrNilRequest, got %v", err)
 	}
 }

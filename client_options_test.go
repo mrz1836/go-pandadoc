@@ -106,4 +106,22 @@ func TestRetryPolicyNormalize(t *testing.T) {
 	if n.InitialBackoff <= 0 || n.MaxBackoff <= 0 {
 		t.Fatalf("expected normalized positive backoffs: %+v", n)
 	}
+
+	p2 := RetryPolicy{MaxRetries: 1, InitialBackoff: 5 * time.Second, MaxBackoff: time.Second}
+	n2 := p2.normalize()
+	if n2.MaxBackoff != n2.InitialBackoff {
+		t.Fatalf("expected max backoff to be clamped to initial backoff: %+v", n2)
+	}
+}
+
+func TestNewClient_NilOptionAndUserAgentFallback(t *testing.T) {
+	t.Parallel()
+
+	c, err := NewClient(nil, WithUserAgent("   "))
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+	if c.userAgent != DefaultUserAgent {
+		t.Fatalf("expected default user-agent, got %q", c.userAgent)
+	}
 }

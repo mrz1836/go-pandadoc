@@ -28,6 +28,15 @@ func TestAPIErrorHelpers(t *testing.T) {
 	if !IsRateLimited(err429) {
 		t.Fatalf("rate limit helper mismatch")
 	}
+	if IsForbidden(errTestDummy) {
+		t.Fatalf("expected false for non-API forbidden check")
+	}
+	if IsNotFound(errTestDummy) {
+		t.Fatalf("expected false for non-API not-found check")
+	}
+	if IsRateLimited(errTestDummy) {
+		t.Fatalf("expected false for non-API rate-limit check")
+	}
 	if err429.Error() == "" {
 		t.Fatalf("expected non-empty error string")
 	}

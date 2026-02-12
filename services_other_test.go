@@ -3,6 +3,7 @@ package pandadoc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -279,5 +280,162 @@ func TestWebhookEventsService_Validation(t *testing.T) {
 
 	if _, err := client.WebhookEvents().Get(context.Background(), ""); err == nil {
 		t.Fatalf("expected empty id error")
+	}
+}
+
+func TestProductCatalogService_SearchNilOptions(t *testing.T) {
+	t.Parallel()
+
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/public/v2/product-catalog/items/search" {
+			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
+		}
+		if r.URL.RawQuery != "" {
+			t.Fatalf("expected empty query for nil options, got %q", r.URL.RawQuery)
+		}
+		_, _ = io.WriteString(w, `{"items":[],"has_more_items":false,"total":0}`)
+	})
+
+	if _, err := client.ProductCatalog().Search(context.Background(), nil); err != nil {
+		t.Fatalf("Search with nil options failed: %v", err)
+	}
+}
+
+func TestProductCatalogService_ErrorPropagation(t *testing.T) {
+	t.Parallel()
+
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = io.WriteString(w, `{"detail":"boom"}`)
+	})
+
+	if _, err := client.ProductCatalog().Search(context.Background(), &SearchProductCatalogItemsOptions{}); err == nil {
+		t.Fatalf("expected search error")
+	}
+	if _, err := client.ProductCatalog().Create(context.Background(), CreateProductCatalogItemRequest{"title": "x"}); err == nil {
+		t.Fatalf("expected create error")
+	}
+	if _, err := client.ProductCatalog().Get(context.Background(), "i1"); err == nil {
+		t.Fatalf("expected get error")
+	}
+	if _, err := client.ProductCatalog().Update(context.Background(), "i1", UpdateProductCatalogItemRequest{"title": "x"}); err == nil {
+		t.Fatalf("expected update error")
+	}
+	if _, err := client.ProductCatalog().Update(context.Background(), "", UpdateProductCatalogItemRequest{"title": "x"}); !errors.Is(err, ErrEmptyPathParameter) {
+		t.Fatalf("expected ErrEmptyPathParameter, got %v", err)
+	}
+}
+
+func TestOAuthService_TokenRefreshAndError(t *testing.T) {
+	t.Parallel()
+
+	refreshClient := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/oauth2/access_token" {
+			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
+		}
+		body, _ := io.ReadAll(r.Body)
+		raw := string(body)
+		if !strings.Contains(raw, "grant_type=refresh_token") || !strings.Contains(raw, "refresh_token=r1") || !strings.Contains(raw, "redirect_uri=https%3A%2F%2Fexample.com%2Fcallback") {
+			t.Fatalf("unexpected oauth refresh form body: %s", raw)
+		}
+		_, _ = io.WriteString(w, `{"access_token":"a2","token_type":"Bearer","expires_in":3600}`)
+	})
+
+	if _, err := refreshClient.OAuth().Token(context.Background(), &OAuthTokenRequest{
+		GrantType:    "refresh_token",
+		ClientID:     "cid",
+		ClientSecret: "secret",
+		RefreshToken: "r1",
+		RedirectURI:  "https://example.com/callback",
+	}); err != nil {
+		t.Fatalf("Token refresh failed: %v", err)
+	}
+
+	errClient := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = io.WriteString(w, `{"error":"invalid_grant","error_description":"expired"}`)
+	})
+	if _, err := errClient.OAuth().Token(context.Background(), &OAuthTokenRequest{GrantType: "refresh_token"}); err == nil {
+		t.Fatalf("expected oauth error")
+	}
+}
+
+//nolint:gocognit // Test function that validates multiple error scenarios
+func TestWebhookServices_NilOptionsAndErrors(t *testing.T) {
+	t.Parallel()
+
+	nilOptsClient := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/public/v1/webhook-subscriptions":
+			if r.URL.RawQuery != "" {
+				t.Fatalf("expected empty subscriptions query, got %q", r.URL.RawQuery)
+			}
+			_, _ = io.WriteString(w, `{"items":[]}`)
+		case r.Method == http.MethodGet && r.URL.Path == "/public/v1/webhook-events":
+			if r.URL.RawQuery != "" {
+				t.Fatalf("expected empty events query, got %q", r.URL.RawQuery)
+			}
+			_, _ = io.WriteString(w, `{"items":[]}`)
+		default:
+			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
+		}
+	})
+
+	if _, err := nilOptsClient.WebhookSubscriptions().List(context.Background(), nil); err != nil {
+		t.Fatalf("WebhookSubscriptions List(nil) failed: %v", err)
+	}
+	if _, err := nilOptsClient.WebhookEvents().List(context.Background(), nil); err != nil {
+		t.Fatalf("WebhookEvents List(nil) failed: %v", err)
+	}
+
+	queryClient := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/public/v1/webhook-events" {
+			t.Fatalf("unexpected request %s %s", r.Method, r.URL.Path)
+		}
+		q := r.URL.Query()
+		if q.Get("since") != "2024-01-01T00:00:00Z" || q.Get("to") != "2024-01-02T00:00:00Z" || q.Get("type") != "document_created" || q.Get("http_status_code") != "200" || q.Get("error") != "true" {
+			t.Fatalf("unexpected events query params: %s", r.URL.RawQuery)
+		}
+		_, _ = io.WriteString(w, `{"items":[]}`)
+	})
+	_, err := queryClient.WebhookEvents().List(context.Background(), &ListWebhookEventsOptions{
+		Since:          "2024-01-01T00:00:00Z",
+		To:             "2024-01-02T00:00:00Z",
+		Type:           "document_created",
+		HTTPStatusCode: 200,
+		Error:          ptrBool(true),
+	})
+	if err != nil {
+		t.Fatalf("WebhookEvents List query serialization failed: %v", err)
+	}
+
+	errClient := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = io.WriteString(w, `{"detail":"boom"}`)
+	})
+
+	if _, err := errClient.WebhookSubscriptions().List(context.Background(), &ListWebhookSubscriptionsOptions{}); err == nil {
+		t.Fatalf("expected webhook subscriptions list error")
+	}
+	if _, err := errClient.WebhookSubscriptions().Create(context.Background(), &WebhookSubscriptionRequest{Name: "x"}); err == nil {
+		t.Fatalf("expected webhook subscriptions create error")
+	}
+	if _, err := errClient.WebhookSubscriptions().Get(context.Background(), "w1"); err == nil {
+		t.Fatalf("expected webhook subscriptions get error")
+	}
+	if _, err := errClient.WebhookSubscriptions().Update(context.Background(), "w1", &WebhookSubscriptionRequest{Name: "x"}); err == nil {
+		t.Fatalf("expected webhook subscriptions update error")
+	}
+	if _, err := errClient.WebhookSubscriptions().Update(context.Background(), "", &WebhookSubscriptionRequest{Name: "x"}); !errors.Is(err, ErrEmptyPathParameter) {
+		t.Fatalf("expected ErrEmptyPathParameter, got %v", err)
+	}
+	if _, err := errClient.WebhookSubscriptions().RegenerateSharedKey(context.Background(), "w1"); err == nil {
+		t.Fatalf("expected webhook subscriptions shared-key error")
+	}
+	if _, err := errClient.WebhookEvents().List(context.Background(), &ListWebhookEventsOptions{}); err == nil {
+		t.Fatalf("expected webhook events list error")
+	}
+	if _, err := errClient.WebhookEvents().Get(context.Background(), "e1"); err == nil {
+		t.Fatalf("expected webhook events get error")
 	}
 }

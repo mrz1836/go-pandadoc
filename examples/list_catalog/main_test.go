@@ -42,6 +42,36 @@ func TestRun_Success(t *testing.T) {
 	}
 }
 
+func TestRun_CreateClientError(t *testing.T) {
+	t.Parallel()
+
+	env := map[string]string{"PANDADOC_API_KEY": "k", "PANDADOC_BASE_URL": "::bad"}
+	getenv := func(k string) string { return env[k] }
+
+	err := run(context.Background(), getenv, io.Discard)
+	if err == nil || !strings.Contains(err.Error(), "create client") {
+		t.Fatalf("expected create client error, got %v", err)
+	}
+}
+
+func TestRun_PropagatesAPIError(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = io.WriteString(w, `{"detail":"server failure"}`)
+	}))
+	defer srv.Close()
+
+	env := map[string]string{"PANDADOC_API_KEY": "k", "PANDADOC_BASE_URL": srv.URL}
+	getenv := func(k string) string { return env[k] }
+
+	err := run(context.Background(), getenv, io.Discard)
+	if err == nil || !strings.Contains(err.Error(), "search catalog") {
+		t.Fatalf("expected search catalog error, got %v", err)
+	}
+}
+
 func TestMain_Success(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = io.WriteString(w, `{"items":[],"has_more_items":false,"total":0}`)

@@ -564,3 +564,271 @@ func TestDoTransportError(t *testing.T) {
 		t.Fatalf("expected transport error")
 	}
 }
+
+func TestJoinPaths_EmptyRelative(t *testing.T) {
+	t.Parallel()
+
+	if got := joinPaths("/public/v1/", ""); got != "/public/v1" {
+		t.Fatalf("unexpected joined path: %s", got)
+	}
+	if got := joinPaths("/public/v1", ""); got != "/public/v1" {
+		t.Fatalf("unexpected joined path: %s", got)
+	}
+}
+
+func TestBuildURL_ParseEndpointPathError(t *testing.T) {
+	t.Parallel()
+
+	c, err := NewClientWithAPIKey("k", WithBaseURL("https://api.example.com"))
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+
+	if _, err := c.buildURL("http://[::1", nil); err == nil {
+		t.Fatalf("expected parse endpoint path error")
+	}
+}
+
+func TestDo_BuildURLAndBodyEncodeFailures(t *testing.T) {
+	t.Parallel()
+
+	c, err := NewClientWithAPIKey("k", WithBaseURL("https://api.example.com"))
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+
+	if resp, err2 := c.do(context.Background(), &request{method: http.MethodGet, path: "http://[::1", requireAuth: true}); err2 == nil {
+		_ = resp.Body.Close()
+		t.Fatalf("expected buildURL error")
+	}
+
+	resp, bodyErr := c.do(context.Background(), &request{
+		method:      http.MethodGet,
+		path:        "/x",
+		requireAuth: true,
+		jsonBody:    map[string]any{"x": 1},
+		formBody:    url.Values{"a": []string{"1"}},
+	})
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
+	if !errors.Is(bodyErr, errOnlyOneBodyType) {
+		t.Fatalf("expected body-type conflict error, got %v", bodyErr)
+	}
+}
+
+func TestDo_CustomHeadersPropagation(t *testing.T) {
+	t.Parallel()
+
+	var seen []string
+	client := newRoundTripperClient(t, func(req *http.Request) (*http.Response, error) {
+		seen = req.Header.Values("X-Test")
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(strings.NewReader(`{"ok":true}`)),
+		}, nil
+	})
+
+	var out map[string]bool
+	err := client.decodeJSON(context.Background(), &request{
+		method:      http.MethodGet,
+		path:        "/x",
+		requireAuth: true,
+		headers:     http.Header{"X-Test": []string{"a", "b"}},
+	}, &out)
+	if err != nil {
+		t.Fatalf("decodeJSON failed: %v", err)
+	}
+	if len(seen) != 2 || seen[0] != "a" || seen[1] != "b" {
+		t.Fatalf("unexpected propagated headers: %v", seen)
+	}
+}
+
+func TestDoAttempt_InjectAuthError(t *testing.T) {
+	t.Parallel()
+
+	httpClient := &http.Client{Transport: roundTripperFunc(func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{}`))}, nil
+	})}
+	c, err := NewClient(WithBaseURL("https://api.example.com"), WithHTTPClient(httpClient))
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+
+	resp, retryable, err := c.doAttempt(context.Background(), &request{method: http.MethodGet, requireAuth: true}, "https://api.example.com/x", nil, "")
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
+	if !errors.Is(err, ErrMissingAuthentication) {
+		t.Fatalf("expected ErrMissingAuthentication, got %v", err)
+	}
+	if retryable {
+		t.Fatalf("did not expect auth error to be retryable")
+	}
+}
+
+func TestDecodeJSON_ReadBodyError(t *testing.T) {
+	t.Parallel()
+
+	client := newRoundTripperClient(t, func(_ *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Header:     make(http.Header),
+			Body:       io.NopCloser(newErrorReader()),
+		}, nil
+	})
+
+	var out map[string]any
+	err := client.decodeJSON(context.Background(), &request{method: http.MethodGet, path: "/x", requireAuth: true}, &out)
+	if err == nil || !strings.Contains(err.Error(), "decode response body") {
+		t.Fatalf("expected read response body error, got %v", err)
+	}
+}
+
+func TestDo_RetryableTransportErrorThenFail(t *testing.T) {
+	t.Parallel()
+
+	attempts := 0
+	client := newRoundTripperClient(t, func(_ *http.Request) (*http.Response, error) {
+		attempts++
+		return nil, errTestDummy
+	}, WithRetryPolicy(RetryPolicy{
+		MaxRetries:     1,
+		InitialBackoff: time.Nanosecond,
+		MaxBackoff:     time.Nanosecond,
+	}))
+
+	_, err := client.do(context.Background(), &request{method: http.MethodGet, path: "/retry", requireAuth: true}) //nolint:bodyclose // expected transport error
+	if !errors.Is(err, errTestDummy) {
+		t.Fatalf("expected transport error, got %v", err)
+	}
+	if attempts != 2 {
+		t.Fatalf("expected two attempts, got %d", attempts)
+	}
+}
+
+func TestDo_RetryOnStatus_CanceledContext(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	client := newRoundTripperClient(t, func(_ *http.Request) (*http.Response, error) {
+		cancel()
+		return &http.Response{
+			StatusCode: http.StatusTooManyRequests,
+			Header:     http.Header{"Retry-After": []string{"1"}},
+			Body:       io.NopCloser(strings.NewReader(`{}`)),
+		}, nil
+	}, WithRetryPolicy(RetryPolicy{
+		MaxRetries:     1,
+		InitialBackoff: time.Millisecond,
+		MaxBackoff:     time.Millisecond,
+		RetryOn429:     true,
+	}))
+
+	_, err := client.do(ctx, &request{method: http.MethodGet, path: "/retry", requireAuth: true}) //nolint:bodyclose // expected context cancellation
+	if err == nil {
+		t.Fatalf("expected context cancellation error")
+	}
+}
+
+func TestDownload_ErrorPath(t *testing.T) {
+	t.Parallel()
+
+	client := newRoundTripperClient(t, func(_ *http.Request) (*http.Response, error) {
+		return nil, errTestDummy
+	})
+
+	if _, err := client.download(context.Background(), &request{method: http.MethodGet, path: "/x", requireAuth: true}); !errors.Is(err, errTestDummy) {
+		t.Fatalf("expected transport error from download, got %v", err)
+	}
+}
+
+func TestEncodeMultipart_DefaultsAndErrors(t *testing.T) {
+	t.Parallel()
+
+	payload, contentType, err := encodeMultipart(&multipartPayload{
+		Files: []multipartFile{{
+			Reader: strings.NewReader("data"),
+		}},
+	})
+	if err != nil {
+		t.Fatalf("encodeMultipart defaults failed: %v", err)
+	}
+	_, params, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		t.Fatalf("parse media type failed: %v", err)
+	}
+	mr := multipart.NewReader(bytes.NewReader(payload), params["boundary"])
+	part, err := mr.NextPart()
+	if err != nil {
+		t.Fatalf("read multipart part failed: %v", err)
+	}
+	if part.FormName() != "file" || part.FileName() != "upload.bin" {
+		t.Fatalf("unexpected multipart defaults: form=%s file=%s", part.FormName(), part.FileName())
+	}
+
+	if _, _, err := encodeMultipart(&multipartPayload{
+		Files: []multipartFile{{
+			FieldName: "file",
+			FileName:  "x.txt",
+			Reader:    newErrorReader(),
+		}},
+	}); err == nil {
+		t.Fatalf("expected multipart copy error")
+	}
+}
+
+func TestStatusExpectedAndExtractErrorDetails(t *testing.T) {
+	t.Parallel()
+
+	if statusExpected(http.StatusOK, []int{http.StatusCreated}) {
+		t.Fatalf("did not expect status to match explicit expected list")
+	}
+
+	e := &APIError{}
+	extractErrorDetails(e, map[string]any{"details": map[string]any{"field": "name"}})
+	if e.Details == nil {
+		t.Fatalf("expected details to be extracted")
+	}
+}
+
+func TestParseRetryAfter_EmptyAndPastDate(t *testing.T) {
+	t.Parallel()
+
+	if _, ok := parseRetryAfter(""); ok {
+		t.Fatalf("expected empty retry-after to fail parse")
+	}
+
+	past := time.Now().Add(-time.Minute).UTC().Format(http.TimeFormat)
+	d, ok := parseRetryAfter(past)
+	if !ok || d != 0 {
+		t.Fatalf("expected past retry-after to parse as zero delay: ok=%v d=%v", ok, d)
+	}
+}
+
+func TestSleepWithContext_TimerCompletion(t *testing.T) {
+	t.Parallel()
+
+	if err := sleepWithContext(context.Background(), time.Millisecond); err != nil {
+		t.Fatalf("expected sleepWithContext timer completion, got %v", err)
+	}
+}
+
+func TestRetryBackoff_UncappedBranch(t *testing.T) {
+	t.Parallel()
+
+	c, err := NewClientWithAPIKey("k")
+	if err != nil {
+		t.Fatalf("NewClient failed: %v", err)
+	}
+	c.retryPolicy = RetryPolicy{
+		MaxRetries:     5,
+		InitialBackoff: 100 * time.Millisecond,
+		MaxBackoff:     5 * time.Second,
+	}.normalize()
+
+	if got := c.backoff(1); got != 200*time.Millisecond {
+		t.Fatalf("unexpected backoff for uncapped branch: %v", got)
+	}
+}
