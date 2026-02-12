@@ -357,7 +357,7 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 |--------|--------|----------|------------|----------|
 | ✅ | GET | `/public/v1/documents` | `Documents().List()` | [📄](https://developers.pandadoc.com/reference/list-documents) |
 | ✅ | POST | `/public/v1/documents` | `Documents().Create()` | [📄](https://developers.pandadoc.com/reference/create-document) |
-| ✅ | POST | `/public/v1/documents?upload` | `Documents().CreateFromUpload()` | [📄](https://developers.pandadoc.com/reference/upload-document) |
+| ✅ | POST | `/public/v1/documents?upload` | `Documents().CreateFromUpload()` | [📄](https://developers.pandadoc.com/reference/create-document-from-upload) |
 | ✅ | GET | `/public/v1/documents/{id}` | `Documents().Status()` | [📄](https://developers.pandadoc.com/reference/status-document) |
 | ✅ | PATCH | `/public/v1/documents/{id}` | `Documents().Update()` | [📄](https://developers.pandadoc.com/reference/update-document) |
 | ✅ | DELETE | `/public/v1/documents/{id}` | `Documents().Delete()` | [📄](https://developers.pandadoc.com/reference/delete-document) |
@@ -375,8 +375,8 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 | ✅ | PATCH | `/public/v1/documents/{id}/ownership` | `Documents().TransferOwnership()` | [📄](https://developers.pandadoc.com/reference/transfer-document-ownership) |
 | ✅ | PATCH | `/public/v1/documents/ownership` | `Documents().TransferAllOwnership()` | [📄](https://developers.pandadoc.com/reference/transfer-all-documents-ownership) |
 | ✅ | POST | `/public/v1/documents/{id}/append-content-library-item` | `Documents().AppendContentLibraryItem()` | [📄](https://developers.pandadoc.com/reference/append-content-library-item-to-document) |
-| ❌ | POST | `/public/beta/documents/{document_id}/docx-export-tasks` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-export-docx-task) |
-| ❌ | GET | `/public/beta/documents/{document_id}/docx-export-tasks/{task_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/get-docx-export-task) |
+| ❌ | POST | `/public/beta/documents/{document_id}/docx-export-tasks` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/createexportdocxtask) |
+| ❌ | GET | `/public/beta/documents/{document_id}/docx-export-tasks/{task_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/getdocxexporttask) |
 
 ---
 
@@ -433,10 +433,10 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 |--------|--------|----------|------------|----------|
 | ❌ | GET | `/public/v1/templates` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-templates) |
 | ❌ | POST | `/public/v1/templates` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-template) |
-| ❌ | POST | `/public/v1/templates?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-template-with-upload) |
-| ❌ | GET | `/public/v1/templates/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/status-template) |
-| ❌ | GET | `/public/v1/templates/{id}/details` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-template) |
-| ❌ | PATCH | `/public/v1/templates/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/update-template) |
+| ❌ | POST | `/public/v1/templates?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-template-from-file) |
+| ❌ | GET | `/public/v1/templates/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/template-status) |
+| ❌ | GET | `/public/v1/templates/{id}/details` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/template-details) |
+| ❌ | PATCH | `/public/v1/templates/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/template-update) |
 | ❌ | DELETE | `/public/v1/templates/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/delete-template) |
 | ❌ | POST | `/public/v1/templates/{id}/editing-sessions` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-template-editing-session) |
 
@@ -447,10 +447,10 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | POST | `/public/v1/documents/{id}/recipients` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/add-document-recipient) |
+| ❌ | POST | `/public/v1/documents/{id}/recipients` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/add-cc-recipient) |
 | ❌ | PATCH | `/public/v1/documents/{id}/recipients/recipient/{recipient_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/edit-document-recipient) |
 | ❌ | DELETE | `/public/v1/documents/{id}/recipients/{recipient_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/delete-document-recipient) |
-| ❌ | POST | `/public/v1/documents/{id}/recipients/{recipient_id}/reassign` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/reassign-document-recipient) |
+| ❌ | POST | `/public/v1/documents/{id}/recipients/{recipient_id}/reassign` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/change-signer) |
 
 ---
 
@@ -469,12 +469,12 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | GET | `/public/v1/documents/{id}/attachments` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-document-attachments) |
+| ❌ | GET | `/public/v1/documents/{id}/attachments` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-attachment) |
 | ❌ | POST | `/public/v1/documents/{id}/attachments` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-document-attachment) |
 | ❌ | POST | `/public/v1/documents/{id}/attachments?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-document-attachment-from-file-upload) |
-| ❌ | GET | `/public/v1/documents/{id}/attachments/{attachment_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-document-attachment) |
-| ❌ | DELETE | `/public/v1/documents/{id}/attachments/{attachment_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/delete-document-attachment) |
-| ❌ | GET | `/public/v1/documents/{id}/attachments/{attachment_id}/download` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/download-document-attachment) |
+| ❌ | GET | `/public/v1/documents/{id}/attachments/{attachment_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/attachment-details) |
+| ❌ | DELETE | `/public/v1/documents/{id}/attachments/{attachment_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/delete-attachment) |
+| ❌ | GET | `/public/v1/documents/{id}/attachments/{attachment_id}/download` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/download-attachment) |
 
 ---
 
@@ -483,10 +483,10 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | GET | `/public/v1/documents/{document_id}/auto-reminders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/get-document-auto-reminder-settings) |
-| ❌ | PATCH | `/public/v1/documents/{document_id}/auto-reminders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/update-document-auto-reminder-settings) |
-| ❌ | GET | `/public/v1/documents/{document_id}/auto-reminders/status` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/status-document-auto-reminder) |
-| ❌ | POST | `/public/v1/documents/{document_id}/send-reminder` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-manual-reminder) |
+| ❌ | GET | `/public/v1/documents/{document_id}/auto-reminders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/getdocumentautoremindersettings) |
+| ❌ | PATCH | `/public/v1/documents/{document_id}/auto-reminders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/updatedocumentautoremindersettings) |
+| ❌ | GET | `/public/v1/documents/{document_id}/auto-reminders/status` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/statusdocumentautoreminder) |
+| ❌ | POST | `/public/v1/documents/{document_id}/send-reminder` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/createmanualreminder) |
 
 ---
 
@@ -496,10 +496,10 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
 | ❌ | GET | `/public/v1/documents/{document_id}/sections` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-sections) |
-| ❌ | POST | `/public/v1/documents/{document_id}/sections/uploads` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/upload-section) |
-| ❌ | POST | `/public/v1/documents/{document_id}/sections/uploads?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/upload-section-with-upload) |
-| ❌ | GET | `/public/v1/documents/{document_id}/sections/uploads/{upload_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/section-details) |
-| ❌ | GET | `/public/v1/documents/{document_id}/sections/{section_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/section-info) |
+| ❌ | POST | `/public/v1/documents/{document_id}/sections/uploads` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-document-section) |
+| ❌ | POST | `/public/v1/documents/{document_id}/sections/uploads?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-document-section-from-upload) |
+| ❌ | GET | `/public/v1/documents/{document_id}/sections/uploads/{upload_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/document-section-upload-status) |
+| ❌ | GET | `/public/v1/documents/{document_id}/sections/{section_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-document-section) |
 | ❌ | DELETE | `/public/v1/documents/{document_id}/sections/{section_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/delete-section) |
 
 ---
@@ -511,7 +511,7 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 |--------|--------|----------|------------|----------|
 | ❌ | GET | `/public/v1/documents/linked-objects` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-documents-by-linked-object) |
 | ❌ | GET | `/public/v1/documents/{id}/linked-objects` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-linked-objects) |
-| ❌ | POST | `/public/v1/documents/{id}/linked-objects` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-linked-object) |
+| ❌ | POST | `/public/v1/documents/{id}/linked-objects` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/link-to-crm) |
 | ❌ | DELETE | `/public/v1/documents/{id}/linked-objects/{linked_object_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/delete-linked-object) |
 
 ---
@@ -536,9 +536,9 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 |--------|--------|----------|------------|----------|
 | ❌ | GET | `/public/v1/content-library-items` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-content-library-items) |
 | ❌ | POST | `/public/v1/content-library-items` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-content-library-item) |
-| ❌ | POST | `/public/v1/content-library-items?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-content-library-item-from-upload) |
-| ❌ | GET | `/public/v1/content-library-items/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/status-content-library-item) |
-| ❌ | GET | `/public/v1/content-library-items/{id}/details` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-content-library-item) |
+| ❌ | POST | `/public/v1/content-library-items?upload` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-content-library-item-from-file) |
+| ❌ | GET | `/public/v1/content-library-items/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/content-library-item-details) |
+| ❌ | GET | `/public/v1/content-library-items/{id}/details` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/content-library-item-details) |
 
 ---
 
@@ -547,7 +547,7 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | GET | `/public/v1/forms` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-form) |
+| ❌ | GET | `/public/v1/forms` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-forms) |
 
 ---
 
@@ -556,11 +556,11 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | GET | `/public/v1/documents/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-document-folders) |
+| ❌ | GET | `/public/v1/documents/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-documents-folders) |
 | ❌ | POST | `/public/v1/documents/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-document-folder) |
 | ❌ | PUT | `/public/v1/documents/folders/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/rename-document-folder) |
-| ❌ | GET | `/public/v1/templates/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-template-folders) |
-| ❌ | POST | `/public/v1/templates/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-template-folder) |
+| ❌ | GET | `/public/v1/templates/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-templates-folders) |
+| ❌ | POST | `/public/v1/templates/folders` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-templates-folder) |
 | ❌ | PUT | `/public/v1/templates/folders/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/rename-template-folder) |
 
 ---
@@ -570,7 +570,7 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | PUT | `/public/v1/documents/{document_id}/quotes/{quote_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/quote-update) |
+| ❌ | PUT | `/public/v1/documents/{document_id}/quotes/{quote_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/update-quote) |
 
 ---
 
@@ -580,8 +580,8 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
 | ❌ | GET | `/public/v1/members` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-members) |
-| ❌ | GET | `/public/v1/members/current` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-current-member) |
-| ❌ | GET | `/public/v1/members/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-member) |
+| ❌ | GET | `/public/v1/members/current` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/member-details) |
+| ❌ | GET | `/public/v1/members/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/member-details) |
 | ❌ | POST | `/public/v1/members/{member_id}/token` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-member-token) |
 
 ---
@@ -597,7 +597,7 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 | ❌ | POST | `/public/v1/workspaces` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-workspace) |
 | ❌ | POST | `/public/v1/workspaces/{workspace_id}/api-keys` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/create-api-key) |
 | ❌ | POST | `/public/v1/workspaces/{workspace_id}/deactivate` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/deactivate-workspace) |
-| ❌ | POST | `/public/v1/workspaces/{workspace_id}/members` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/add-member) |
+| ❌ | POST | `/public/v1/workspaces/{workspace_id}/members` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/add-member-to-workspace) |
 | ❌ | DELETE | `/public/v1/workspaces/{workspace_id}/members/{member_id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/remove-member) |
 
 ---
@@ -607,10 +607,10 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | GET | `/public/v1/logs` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-logs) |
-| ❌ | GET | `/public/v1/logs/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-log) |
-| ❌ | GET | `/public/v2/logs` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-logs-v2) |
-| ❌ | GET | `/public/v2/logs/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/details-log-v2) |
+| ❌ | GET | `/public/v1/logs` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-api-logs) |
+| ❌ | GET | `/public/v1/logs/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/api-log-details) |
+| ❌ | GET | `/public/v2/logs` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-api-logs) |
+| ❌ | GET | `/public/v2/logs/{id}` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/api-log-details) |
 
 ---
 
@@ -669,7 +669,7 @@ This SDK implements core PandaDoc API functionality. Below is a comprehensive co
 
 | Status | Method | Endpoint | SDK Method | API Docs |
 |--------|--------|----------|------------|----------|
-| ❌ | GET | `/public/v1/sms-opt-outs` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/list-recent-sms-opt-outs) |
+| ❌ | GET | `/public/v1/sms-opt-outs` | *Not implemented* | [📄](https://developers.pandadoc.com/reference/listrecentsmsoptouts) |
 
 ---
 
