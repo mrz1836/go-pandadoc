@@ -5,16 +5,16 @@ import "time"
 
 // Document represents a PandaDoc document.
 type Document struct {
-	ID            string    `json:"id"`
-	Name          string    `json:"name"`
-	Status        string    `json:"status"`
-	DateCreated   time.Time `json:"date_created"`
-	DateModified  time.Time `json:"date_modified"`
-	DateCompleted time.Time `json:"date_completed,omitempty"`
-	ExpirationDate *time.Time `json:"expiration_date,omitempty"`
-	UUID          string    `json:"uuid,omitempty"`
-	Version       string    `json:"version,omitempty"`
-	Metadata      map[string]interface{} `json:"metadata,omitempty"`
+	ID             string                 `json:"id"`
+	Name           string                 `json:"name"`
+	Status         string                 `json:"status"`
+	DateCreated    time.Time              `json:"date_created"`
+	DateModified   time.Time              `json:"date_modified"`
+	DateCompleted  time.Time              `json:"date_completed,omitempty"`
+	ExpirationDate *time.Time             `json:"expiration_date,omitempty"`
+	UUID           string                 `json:"uuid,omitempty"`
+	Version        string                 `json:"version,omitempty"`
+	Metadata       map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // DocumentStatus represents the status of a document.
@@ -59,14 +59,14 @@ type PricingTable struct {
 
 // TableSection represents a section in a pricing table.
 type TableSection struct {
-	Title string      `json:"title,omitempty"`
-	Rows  []TableRow  `json:"rows,omitempty"`
+	Title string     `json:"title,omitempty"`
+	Rows  []TableRow `json:"rows,omitempty"`
 }
 
 // TableRow represents a row in a pricing table section.
 type TableRow struct {
-	ID          string                 `json:"id"`
-	Data        map[string]interface{} `json:"data,omitempty"`
+	ID           string                 `json:"id"`
+	Data         map[string]interface{} `json:"data,omitempty"`
 	CustomFields map[string]interface{} `json:"custom_fields,omitempty"`
 }
 
