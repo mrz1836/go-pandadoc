@@ -3,44 +3,50 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
+	"io"
 	"os"
 
 	"github.com/mrz1836/go-pandadoc"
-	"github.com/mrz1836/go-pandadoc/commands"
 )
 
-func main() {
-	// Get API key from environment
-	apiKey := os.Getenv("PANDADOC_API_KEY")
+var errMissingAPIKey = errors.New("PANDADOC_API_KEY environment variable is required")
+
+func run(ctx context.Context, getenv func(string) string, out io.Writer) error {
+	apiKey := getenv("PANDADOC_API_KEY")
 	if apiKey == "" {
-		log.Fatal("PANDADOC_API_KEY environment variable is required")
+		return errMissingAPIKey
 	}
 
-	// Create client
-	client, err := pandadoc.NewClient(apiKey)
+	opts := []pandadoc.Option{}
+	if baseURL := getenv("PANDADOC_BASE_URL"); baseURL != "" {
+		opts = append(opts, pandadoc.WithBaseURL(baseURL))
+	}
+
+	client, err := pandadoc.NewClientWithAPIKey(apiKey, opts...)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return fmt.Errorf("create client: %w", err)
 	}
 
-	// List catalog items
-	opts := &commands.ListCatalogOptions{
-		Count: 25,
-	}
-
-	items, err := client.Catalog().List(context.Background(), opts)
+	items, err := client.ProductCatalog().Search(ctx, &pandadoc.SearchProductCatalogItemsOptions{PerPage: 25})
 	if err != nil {
-		log.Fatalf("Failed to list catalog items: %v", err)
+		return fmt.Errorf("search catalog: %w", err)
 	}
 
-	// Print results
-	fmt.Printf("Found %d catalog items:\n", items.Count) //nolint:forbidigo // CLI output
-	for _, item := range items.Results {
+	_, _ = fmt.Fprintf(out, "Found %d catalog items:\n", items.Total)
+	for _, item := range items.Items {
 		price := "N/A"
 		if item.Price != nil {
-			price = fmt.Sprintf("%.2f %s", item.Price.Value, item.Price.Currency)
+			price = fmt.Sprintf("%.2f %s", *item.Price, item.Currency)
 		}
-		fmt.Printf("  - %s: %s (SKU: %s, Price: %s)\n", item.ID, item.Name, item.SKU, price) //nolint:forbidigo // CLI output
+		_, _ = fmt.Fprintf(out, "  - %s: %s (SKU: %s, Price: %s)\n", item.UUID, item.Title, item.SKU, price)
+	}
+	return nil
+}
+
+func main() {
+	if err := run(context.Background(), os.Getenv, os.Stdout); err != nil {
+		panic(err)
 	}
 }

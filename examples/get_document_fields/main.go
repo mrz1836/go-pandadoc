@@ -3,56 +3,66 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
+	"io"
 	"os"
 
 	"github.com/mrz1836/go-pandadoc"
 )
 
-func main() {
-	// Get API key from environment
-	apiKey := os.Getenv("PANDADOC_API_KEY")
+var (
+	errMissingAPIKey = errors.New("PANDADOC_API_KEY environment variable is required")
+	errUsage         = errors.New("usage: get_document_fields <document_id>")
+)
+
+func run(ctx context.Context, args []string, getenv func(string) string, out io.Writer) error {
+	apiKey := getenv("PANDADOC_API_KEY")
 	if apiKey == "" {
-		log.Fatal("PANDADOC_API_KEY environment variable is required")
+		return errMissingAPIKey
+	}
+	if len(args) < 2 {
+		return errUsage
+	}
+	docID := args[1]
+
+	opts := []pandadoc.Option{}
+	if baseURL := getenv("PANDADOC_BASE_URL"); baseURL != "" {
+		opts = append(opts, pandadoc.WithBaseURL(baseURL))
 	}
 
-	// Get document ID from args
-	if len(os.Args) < 2 {
-		log.Fatal("Usage: get_document_fields <document_id>")
-	}
-	docID := os.Args[1]
-
-	// Create client
-	client, err := pandadoc.NewClient(apiKey)
+	client, err := pandadoc.NewClientWithAPIKey(apiKey, opts...)
 	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
+		return fmt.Errorf("create client: %w", err)
 	}
 
-	// Get document details
-	details, err := client.Documents().GetDetails(context.Background(), docID)
+	details, err := client.Documents().Details(ctx, docID)
 	if err != nil {
-		log.Fatalf("Failed to get document details: %v", err)
+		return fmt.Errorf("get details: %w", err)
 	}
 
-	// Print document info
-	fmt.Printf("Document: %s\n", details.Name) //nolint:forbidigo // CLI output
-	fmt.Printf("Status: %s\n", details.Status) //nolint:forbidigo // CLI output
-	fmt.Printf("ID: %s\n", details.ID)         //nolint:forbidigo // CLI output
+	_, _ = fmt.Fprintf(out, "Document: %s\n", details.Name)
+	_, _ = fmt.Fprintf(out, "Status: %s\n", details.Status)
+	_, _ = fmt.Fprintf(out, "ID: %s\n", details.ID)
 
-	// Print fields
 	if len(details.Fields) > 0 {
-		fmt.Println("\nFields:") //nolint:forbidigo // CLI output
-		for name, value := range details.Fields {
-			fmt.Printf("  %s: %v\n", name, value) //nolint:forbidigo // CLI output
+		_, _ = fmt.Fprintln(out, "\nFields:")
+		for _, field := range details.Fields {
+			_, _ = fmt.Fprintf(out, "  %s (%s): %v\n", field.Name, field.Type, field.Value)
+		}
+	}
+	if len(details.Tokens) > 0 {
+		_, _ = fmt.Fprintln(out, "\nTokens:")
+		for _, token := range details.Tokens {
+			_, _ = fmt.Fprintf(out, "  %s: %v\n", token.Name, token.Value)
 		}
 	}
 
-	// Print tokens
-	if len(details.Tokens) > 0 {
-		fmt.Println("\nTokens:") //nolint:forbidigo // CLI output
-		for _, token := range details.Tokens {
-			fmt.Printf("  %s: %s\n", token.Name, token.Value) //nolint:forbidigo // CLI output
-		}
+	return nil
+}
+
+func main() {
+	if err := run(context.Background(), os.Args, os.Getenv, os.Stdout); err != nil {
+		panic(err)
 	}
 }
