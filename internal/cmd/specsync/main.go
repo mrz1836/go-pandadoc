@@ -178,11 +178,11 @@ func writeManifest(path, version string, ops []operation) error {
 	buf.WriteString("\n")
 	buf.WriteString("package spec\n\n")
 	buf.WriteString("// PinnedSpecVersion is the PandaDoc OpenAPI version this SDK is synced against.\n")
-	buf.WriteString(fmt.Sprintf("const PinnedSpecVersion = %q\n\n", version))
+	fmt.Fprintf(&buf, "const PinnedSpecVersion = %q\n\n", version)
 	buf.WriteString("// CoveredOperations is the exact operation manifest supported by this SDK milestone.\n")
 	buf.WriteString("var CoveredOperations = []Operation{\n")
 	for _, op := range ops {
-		buf.WriteString(fmt.Sprintf("\t{Method: %q, Path: %q, OperationID: %q, Tag: %q},\n", op.Method, op.Path, op.OperationID, op.Tag))
+		fmt.Fprintf(&buf, "\t{Method: %q, Path: %q, OperationID: %q, Tag: %q},\n", op.Method, op.Path, op.OperationID, op.Tag)
 	}
 	buf.WriteString("}\n")
 
