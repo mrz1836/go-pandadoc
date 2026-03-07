@@ -4,17 +4,17 @@ package pandadoc
 type OAuthTokenRequest struct {
 	GrantType    string
 	ClientID     string
-	ClientSecret string //nolint:gosec // G117: intentional OAuth credential field
+	ClientSecret string
 	Code         string
-	RefreshToken string //nolint:gosec // G117: intentional OAuth credential field
+	RefreshToken string
 	Scope        string
 	RedirectURI  string
 }
 
 // OAuthTokenResponse is the OAuth access-token response.
 type OAuthTokenResponse struct {
-	AccessToken  string `json:"access_token"`            //nolint:gosec // G117: intentional OAuth credential field
-	RefreshToken string `json:"refresh_token,omitempty"` //nolint:gosec // G117: intentional OAuth credential field
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 	TokenType    string `json:"token_type"`
 	Scope        string `json:"scope,omitempty"`
 	ExpiresIn    int    `json:"expires_in"`

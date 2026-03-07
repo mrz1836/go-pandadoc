@@ -157,7 +157,7 @@ func (c *Client) doAttempt(ctx context.Context, req *request, fullURL string, bo
 		return nil, false, err
 	}
 
-	resp, doErr := c.httpClient.Do(httpReq) //nolint:gosec // G704: false positive, URL is constructed from validated base URL
+	resp, doErr := c.httpClient.Do(httpReq)
 	return resp, true, doErr
 }
 
