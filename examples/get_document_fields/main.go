@@ -41,20 +41,20 @@ func run(ctx context.Context, args []string, getenv func(string) string, out io.
 		return fmt.Errorf("get details: %w", err)
 	}
 
-	_, _ = fmt.Fprintf(out, "Document: %s\n", details.Name) //nolint:gosec // G705: false positive, writing to stdout in CLI tool
-	_, _ = fmt.Fprintf(out, "Status: %s\n", details.Status) //nolint:gosec // G705: false positive, writing to stdout in CLI tool
-	_, _ = fmt.Fprintf(out, "ID: %s\n", details.ID)         //nolint:gosec // G705: false positive, writing to stdout in CLI tool
+	_, _ = fmt.Fprintf(out, "Document: %s\n", details.Name)
+	_, _ = fmt.Fprintf(out, "Status: %s\n", details.Status)
+	_, _ = fmt.Fprintf(out, "ID: %s\n", details.ID)
 
 	if len(details.Fields) > 0 {
 		_, _ = fmt.Fprintln(out, "\nFields:")
 		for _, field := range details.Fields {
-			_, _ = fmt.Fprintf(out, "  %s (%s): %v\n", field.Name, field.Type, field.Value) //nolint:gosec // G705: false positive, writing to stdout in CLI tool
+			_, _ = fmt.Fprintf(out, "  %s (%s): %v\n", field.Name, field.Type, field.Value)
 		}
 	}
 	if len(details.Tokens) > 0 {
 		_, _ = fmt.Fprintln(out, "\nTokens:")
 		for _, token := range details.Tokens {
-			_, _ = fmt.Fprintf(out, "  %s: %v\n", token.Name, token.Value) //nolint:gosec // G705: false positive, writing to stdout in CLI tool
+			_, _ = fmt.Fprintf(out, "  %s: %v\n", token.Name, token.Value)
 		}
 	}
 

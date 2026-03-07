@@ -712,6 +712,7 @@ func TestDo_RetryOnStatus_CanceledContext(t *testing.T) {
 	t.Parallel()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	client := newRoundTripperClient(t, func(_ *http.Request) (*http.Response, error) {
 		cancel()
 		return &http.Response{
