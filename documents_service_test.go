@@ -147,7 +147,7 @@ func TestDocumentsService_CreateFromUpload_AndChangeStatusWithUpload(t *testing.
 			if err != nil {
 				t.Fatalf("read multipart: %v", err)
 			}
-			if part.FormName() == "file" {
+			if part.FormName() == defaultFileField {
 				seenFile = true
 			}
 		}
@@ -164,7 +164,7 @@ func TestDocumentsService_CreateFromUpload_AndChangeStatusWithUpload(t *testing.
 	})
 
 	created, err := client.Documents().CreateFromUpload(context.Background(), &CreateDocumentFromUploadRequest{
-		FileField: "file",
+		FileField: defaultFileField,
 		FileName:  "doc.pdf",
 		File:      strings.NewReader("pdf-data"),
 		Fields:    map[string]string{"name": "Upload"},
@@ -180,7 +180,7 @@ func TestDocumentsService_CreateFromUpload_AndChangeStatusWithUpload(t *testing.
 	if err := client.Documents().ChangeStatusWithUpload(context.Background(), "u1", &ChangeDocumentStatusWithUploadRequest{
 		Status:           DocumentStatusCompleted,
 		NotifyRecipients: &notify,
-		FileField:        "file",
+		FileField:        defaultFileField,
 		FileName:         "evidence.pdf",
 		File:             strings.NewReader("pdf-data-2"),
 	}); err != nil {
@@ -600,7 +600,7 @@ func TestDocumentsService_UploadDefaultsAndValidation(t *testing.T) {
 			fields[part.FormName()] = string(b)
 		}
 
-		if fileField != "file" || fileName != "upload.bin" {
+		if fileField != defaultFileField || fileName != "upload.bin" {
 			t.Fatalf("unexpected upload defaults: field=%s file=%s", fileField, fileName)
 		}
 

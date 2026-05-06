@@ -129,7 +129,7 @@ func (s *documentsService) CreateFromUpload(ctx context.Context, reqBody *Create
 
 	fieldName := reqBody.FileField
 	if fieldName == "" {
-		fieldName = "file"
+		fieldName = defaultFileField
 	}
 
 	var out DocumentCreateResponse
@@ -261,7 +261,7 @@ func (s *documentsService) ChangeStatusWithUpload(ctx context.Context, id string
 
 	fieldName := reqBody.FileField
 	if fieldName == "" {
-		fieldName = "file"
+		fieldName = defaultFileField
 	}
 
 	fields := map[string]string{

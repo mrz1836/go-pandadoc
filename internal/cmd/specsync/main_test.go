@@ -110,7 +110,7 @@ func TestWriteManifest(t *testing.T) {
 
 	dir := t.TempDir()
 	out := filepath.Join(dir, "ops.go")
-	ops := []operation{{Method: "GET", Path: "/x", OperationID: "op", Tag: "Tag"}}
+	ops := []operation{{Method: methodGET, Path: "/x", OperationID: "op", Tag: "Tag"}}
 
 	if err := writeManifest(out, "v1", ops); err != nil {
 		t.Fatalf("writeManifest failed: %v", err)

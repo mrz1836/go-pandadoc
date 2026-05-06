@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const defaultFileField = "file"
+
 var errOnlyOneBodyType = fmt.Errorf("only one request body type can be set")
 
 type request struct {
@@ -367,7 +369,7 @@ func encodeMultipart(payload *multipartPayload) ([]byte, string, error) {
 		}
 		field := file.FieldName
 		if field == "" {
-			field = "file"
+			field = defaultFileField
 		}
 		fileName := file.FileName
 		if fileName == "" {

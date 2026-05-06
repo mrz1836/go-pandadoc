@@ -12,6 +12,11 @@ import (
 	"strings"
 )
 
+const (
+	methodGET  = "GET"
+	methodPOST = "POST"
+)
+
 var errSpecContainsNoPaths = fmt.Errorf("spec contains no paths")
 
 type openAPIDoc struct {
@@ -35,46 +40,46 @@ type operation struct {
 
 var requiredOperations = []operation{ //nolint:gochecknoglobals // needed for test validation
 	// Documents (20)
-	{Method: "GET", Path: "/public/v1/documents"},
-	{Method: "POST", Path: "/public/v1/documents"},
-	{Method: "POST", Path: "/public/v1/documents?upload"},
-	{Method: "GET", Path: "/public/v1/documents/{id}"},
+	{Method: methodGET, Path: "/public/v1/documents"},
+	{Method: methodPOST, Path: "/public/v1/documents"},
+	{Method: methodPOST, Path: "/public/v1/documents?upload"},
+	{Method: methodGET, Path: "/public/v1/documents/{id}"},
 	{Method: "DELETE", Path: "/public/v1/documents/{id}"},
 	{Method: "PATCH", Path: "/public/v1/documents/{id}"},
-	{Method: "GET", Path: "/public/v1/documents/{document_id}/esign-disclosure"},
+	{Method: methodGET, Path: "/public/v1/documents/{document_id}/esign-disclosure"},
 	{Method: "PATCH", Path: "/public/v1/documents/{id}/status"},
 	{Method: "PATCH", Path: "/public/v1/documents/{id}/status?upload"},
-	{Method: "POST", Path: "/public/v1/documents/{id}/draft"},
-	{Method: "GET", Path: "/public/v1/documents/{id}/details"},
-	{Method: "POST", Path: "/public/v1/documents/{id}/send"},
-	{Method: "POST", Path: "/public/v1/documents/{id}/editing-sessions"},
-	{Method: "POST", Path: "/public/v1/documents/{id}/session"},
-	{Method: "GET", Path: "/public/v1/documents/{id}/download"},
-	{Method: "GET", Path: "/public/v1/documents/{id}/download-protected"},
+	{Method: methodPOST, Path: "/public/v1/documents/{id}/draft"},
+	{Method: methodGET, Path: "/public/v1/documents/{id}/details"},
+	{Method: methodPOST, Path: "/public/v1/documents/{id}/send"},
+	{Method: methodPOST, Path: "/public/v1/documents/{id}/editing-sessions"},
+	{Method: methodPOST, Path: "/public/v1/documents/{id}/session"},
+	{Method: methodGET, Path: "/public/v1/documents/{id}/download"},
+	{Method: methodGET, Path: "/public/v1/documents/{id}/download-protected"},
 	{Method: "PATCH", Path: "/public/v1/documents/{id}/ownership"},
 	{Method: "PATCH", Path: "/public/v1/documents/ownership"},
-	{Method: "POST", Path: "/public/v1/documents/{id}/move-to-folder/{folder_id}"},
-	{Method: "POST", Path: "/public/v1/documents/{id}/append-content-library-item"},
+	{Method: methodPOST, Path: "/public/v1/documents/{id}/move-to-folder/{folder_id}"},
+	{Method: methodPOST, Path: "/public/v1/documents/{id}/append-content-library-item"},
 
 	// Product catalog (5)
-	{Method: "GET", Path: "/public/v2/product-catalog/items/search"},
-	{Method: "POST", Path: "/public/v2/product-catalog/items"},
-	{Method: "GET", Path: "/public/v2/product-catalog/items/{item_uuid}"},
+	{Method: methodGET, Path: "/public/v2/product-catalog/items/search"},
+	{Method: methodPOST, Path: "/public/v2/product-catalog/items"},
+	{Method: methodGET, Path: "/public/v2/product-catalog/items/{item_uuid}"},
 	{Method: "PATCH", Path: "/public/v2/product-catalog/items/{item_uuid}"},
 	{Method: "DELETE", Path: "/public/v2/product-catalog/items/{item_uuid}"},
 
 	// OAuth (1)
-	{Method: "POST", Path: "/oauth2/access_token"},
+	{Method: methodPOST, Path: "/oauth2/access_token"},
 
 	// Webhook subscriptions/events (8)
-	{Method: "GET", Path: "/public/v1/webhook-subscriptions"},
-	{Method: "POST", Path: "/public/v1/webhook-subscriptions"},
-	{Method: "GET", Path: "/public/v1/webhook-subscriptions/{id}"},
+	{Method: methodGET, Path: "/public/v1/webhook-subscriptions"},
+	{Method: methodPOST, Path: "/public/v1/webhook-subscriptions"},
+	{Method: methodGET, Path: "/public/v1/webhook-subscriptions/{id}"},
 	{Method: "PATCH", Path: "/public/v1/webhook-subscriptions/{id}"},
 	{Method: "DELETE", Path: "/public/v1/webhook-subscriptions/{id}"},
 	{Method: "PATCH", Path: "/public/v1/webhook-subscriptions/{id}/shared-key"},
-	{Method: "GET", Path: "/public/v1/webhook-events"},
-	{Method: "GET", Path: "/public/v1/webhook-events/{id}"},
+	{Method: methodGET, Path: "/public/v1/webhook-events"},
+	{Method: methodGET, Path: "/public/v1/webhook-events/{id}"},
 }
 
 func main() {

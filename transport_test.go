@@ -76,7 +76,7 @@ func TestEncodeRequestBody(t *testing.T) {
 
 	payload, ct, err = encodeRequestBody(&request{multipart: &multipartPayload{
 		Fields: map[string]string{"f": "v"},
-		Files:  []multipartFile{{FieldName: "file", FileName: "a.txt", Reader: strings.NewReader("hello")}},
+		Files:  []multipartFile{{FieldName: defaultFileField, FileName: "a.txt", Reader: strings.NewReader("hello")}},
 	}})
 	if err != nil {
 		t.Fatalf("multipart encoding failed: %v", err)
@@ -765,13 +765,13 @@ func TestEncodeMultipart_DefaultsAndErrors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read multipart part failed: %v", err)
 	}
-	if part.FormName() != "file" || part.FileName() != "upload.bin" {
+	if part.FormName() != defaultFileField || part.FileName() != "upload.bin" {
 		t.Fatalf("unexpected multipart defaults: form=%s file=%s", part.FormName(), part.FileName())
 	}
 
 	if _, _, err := encodeMultipart(&multipartPayload{
 		Files: []multipartFile{{
-			FieldName: "file",
+			FieldName: defaultFileField,
 			FileName:  "x.txt",
 			Reader:    newErrorReader(),
 		}},
