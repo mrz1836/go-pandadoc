@@ -15,7 +15,8 @@ func newTestClient(t *testing.T, handler http.HandlerFunc, opts ...Option) *Clie
 	t.Cleanup(srv.Close)
 
 	baseOpts := make([]Option, 0, 2+len(opts))
-	baseOpts = append(baseOpts,
+	baseOpts = append(
+		baseOpts,
 		WithBaseURL(srv.URL),
 		WithRetryPolicy(RetryPolicy{MaxRetries: 0, InitialBackoff: 1, MaxBackoff: 1}),
 	)
@@ -44,7 +45,8 @@ func newRoundTripperClient(t *testing.T, rt roundTripperFunc, opts ...Option) *C
 
 	httpClient := &http.Client{Transport: rt}
 	baseOpts := make([]Option, 0, 3+len(opts))
-	baseOpts = append(baseOpts,
+	baseOpts = append(
+		baseOpts,
 		WithBaseURL("https://api.example.com"),
 		WithHTTPClient(httpClient),
 		WithRetryPolicy(RetryPolicy{MaxRetries: 0, InitialBackoff: 1, MaxBackoff: 1}),
